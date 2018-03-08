@@ -1,12 +1,12 @@
 package somun.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 public interface UserRepository extends CrudRepository<User,Integer> , PagingAndSortingRepository<User,Integer> {
 
     public Iterable<User> findByUserNm(User user);
@@ -20,7 +20,7 @@ public interface UserRepository extends CrudRepository<User,Integer> , PagingAnd
     public List<User> findTop10ByUserNoGreaterThan(int usrNo);
 //    public Page<User> findAll(Pageable pageable);
 
-    public User findByUserIdAndUserProvider(String userId ,String userProvider);
+    public User findByUserIdAndUserProviderAndUserStat(String userId , String userProvider, String userStat);
 
 
 

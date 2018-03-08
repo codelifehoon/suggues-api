@@ -1,13 +1,13 @@
 package somun.repository;
 
-
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
-import somun.core.util.RandomUti;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.junit.Test;
+
+import lombok.extern.slf4j.Slf4j;
+import somun.common.util.RandomUti;
 
 @Slf4j
 public class OptionalTest {

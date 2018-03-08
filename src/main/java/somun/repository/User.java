@@ -1,16 +1,26 @@
 package somun.repository;
 
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Date;
 
 
 /**
@@ -42,9 +52,8 @@ public class User implements Serializable {
 	@Column(name="create_no")
 	private int createNo;
 
-	@Lob
 	@Column(name="user_desc")
-	private byte[] userDesc;
+	private String userDesc;
 
 	@Column(name="user_id")
 	@ApiModelProperty(notes = "사용자 사용 ID", required = true)
@@ -65,6 +74,11 @@ public class User implements Serializable {
 	@Column(name="user_stat")
 	@ApiModelProperty(notes = "사용자 정보 상태")
 	private String userStat;
+
+    @Column(name="user_hash")
+    @ApiModelProperty(notes = "사용자 unique hash 값")
+    private String userHash;
+
 
 
 //	@OneToOne(fetch = FetchType.LAZY , cascade={CascadeType.ALL})

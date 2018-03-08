@@ -1,6 +1,7 @@
 package somun.api.v1.user;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,12 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import somun.core.util.LogUtil;
-import somun.core.util.RandomUti;
+
+import lombok.extern.slf4j.Slf4j;
+import somun.common.util.LogUtil;
+import somun.common.util.RandomUti;
 import somun.repository.User;
 import somun.repository.UserRepository;
-
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,10 +49,10 @@ public class UserRestServiceTest {
 
         Date date = new Date();
         User user = User.builder()
-                .userId(RandomUti.randomString(10))
-                .userProvider(RandomUti.randomString(3))
+                .userId("userId")
+                .userProvider("userProvider")
                 .userNm(RandomUti.randomString(3))
-                .userDesc(RandomUti.randomString(10).getBytes())
+                .userDesc(RandomUti.randomString(10) )
                 .createNo(RandomUti.randomNumber(3))
                 .createDt(new Date())
                 .build();

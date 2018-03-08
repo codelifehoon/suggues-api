@@ -1,7 +1,11 @@
 package somun.repository;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.persistence.EntityManagerFactory;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import somun.Application;
-import somun.core.util.LogUtil;
-import somun.core.util.RandomUti;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import somun.Application;
+import somun.common.biz.Codes;
+import somun.common.util.LogUtil;
+import somun.common.util.RandomUti;
 
 
 //@RunWith(SpringJUnit4ClassRunner.class)
@@ -120,11 +122,13 @@ public class UserRepositoryTest {
         Date date = new Date();
 
         User user = User.builder()
-                .userId(RandomUti.randomString(10))
+                .userId("userId")
                 .userNm(RandomUti.randomString(3))
-                .userDesc(RandomUti.randomString(10).getBytes())
+                .userDesc(RandomUti.randomString(10) )
                 .createNo(RandomUti.randomNumber(3))
                 .createDt(date)
+                .userProvider("userProvider")
+                .userStat(Codes.USER_STAT_NOMAL)
                 .build();
 
         User user1 = userRepository.save(user);
@@ -147,7 +151,6 @@ public class UserRepositoryTest {
     }
 
 /*
-
     @Test
     @Commit
     public void EntityManagerFactoryTest() {
@@ -177,16 +180,16 @@ public class UserRepositoryTest {
     public void findByUserIdAndUserProvider() {
 
         User user = User.builder()
-                .userId("Cur lamia ire")
+                .userId("Curl")
                 .userNm(RandomUti.randomString(3))
-                .userDesc(RandomUti.randomString(10).getBytes())
+                .userDesc(RandomUti.randomString(10))
                 .createNo(RandomUti.randomNumber(3))
                 .createDt(new Date())
-                .userProvider("Sunt brodiumes prensionem alter, azureus indictioes.")
+                .userProvider("Sunt")
                 .build();
 
         user = Optional.ofNullable(
-                    userRepository.findByUserIdAndUserProvider(user.getUserId(), user.getUserProvider()))
+                    userRepository.findByUserIdAndUserProviderAndUserStat(user.getUserId(), user.getUserProvider(), Codes.USER_STAT_NOMAL))
                 .orElse(User.builder().build());
 
         new LogUtil().printObject(user);

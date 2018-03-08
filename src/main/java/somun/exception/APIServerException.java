@@ -27,11 +27,11 @@ public  class APIServerException extends APIException {
 
     @Override
     public HttpStatus getStatus() {
-        return HttpStatus.INTERNAL_SERVER_ERROR;
+        return HttpStatus.BAD_REQUEST;
     }
 
     @Override
     public Integer getCode() {
-        return 20000;
+        return -100;
     }
 }
