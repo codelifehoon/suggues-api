@@ -27,9 +27,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.util.LogUtil;
-import somun.repository.AddressRepository;
-import somun.repository.User;
-import somun.repository.UserRepository;
+import somun.service.repository.AddressRepository;
+import somun.service.repository.User;
+import somun.service.repository.UserRepository;
 
 
 @Slf4j

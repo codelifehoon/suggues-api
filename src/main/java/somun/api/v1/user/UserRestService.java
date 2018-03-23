@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,12 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.repository.User;
-import somun.repository.UserRepository;
+import somun.service.repository.User;
+import somun.service.repository.UserRepository;
 
 
 @Slf4j
 @Controller
+@CrossOrigin(origins = "*")
 @RequestMapping(path="User/V1/")
 @Api(value = "User/V1/", description = "User Service", tags = {"User"})
 @ApiResponses(value = {
@@ -40,12 +42,12 @@ public class UserRestService {
     private UserRepository userRepository;
 
 
+    // TODO User에 updateDt 추가 및 변경 해야 한다.
     @Transactional
     @PatchMapping("UpdateUser/{userNo}")
     @ResponseBody
     @ApiOperation(value="",notes = "oauth 사용자 상태를 변경한다.")
     public Integer updateUser(@PathVariable("userNo") Integer userNo , @RequestBody User user){
-
 
         user.setUserNo(userNo);
         new LogUtil().printObject(user);
@@ -57,6 +59,7 @@ public class UserRestService {
     }
 
 
+    // TODO 로그인시 AddUser 사용하는데 기 등록된 사용자에 대해서 로그인 history 추가하는 해야함 , Hash값 구하는부분 수정 해야함.
     @Transactional
     @PostMapping("AddUser")
     @ResponseBody
@@ -65,16 +68,16 @@ public class UserRestService {
 
         new LogUtil().printObject(user);
 
-        User findOne = userRepository.findByUserIdAndUserProviderAndUserStat(user.getUserId(),user.getUserProvider(), Codes.USER_STAT_NOMAL);
+        User findOne = userRepository.findByUserIdAndUserProviderAndUserStat(user.getUserId(),user.getUserProvider(), Codes.USER_STAT.S1);
         if (findOne != null) {
             User copyUser = User.builder().build();
 
             BeanUtils.copyProperties(findOne ,copyUser);
-            copyUser.setUserStat(Codes.USER_STAT_SINGUP);
+            copyUser.setUserStat(Codes.USER_STAT.S9);
             return copyUser;
         }
 
-        user.setUserHash(String.valueOf(RandomUti.randomNumber(99999999)));
+        user.setUserHash(new String(user.getUserId()+user.getUserProvider()).hashCode() + String.valueOf(RandomUti.randomString(9)));
         return userRepository.save(user);
     }
 
@@ -84,7 +87,7 @@ public class UserRestService {
     @ApiOperation(value="",notes = "oauth 등록을 위한 사용자 기본정보")
     public User findUserOne(@PathVariable("userId") String userId ,@PathVariable("userProvider")  String userProvider) {
 
-        User user = Optional.ofNullable(userRepository.findByUserIdAndUserProviderAndUserStat(userId, userProvider, Codes.USER_STAT_NOMAL))
+        User user = Optional.ofNullable(userRepository.findByUserIdAndUserProviderAndUserStat(userId, userProvider, Codes.USER_STAT.S1))
                 .orElse(User.builder().build());
 
 

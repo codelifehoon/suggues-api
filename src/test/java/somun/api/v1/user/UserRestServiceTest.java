@@ -12,10 +12,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.repository.User;
-import somun.repository.UserRepository;
+import somun.service.repository.User;
+import somun.service.repository.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,6 +54,7 @@ public class UserRestServiceTest {
                 .userProvider("userProvider")
                 .userNm(RandomUti.randomString(3))
                 .userDesc(RandomUti.randomString(10) )
+                .userStat(Codes.USER_STAT.S1)
                 .createNo(RandomUti.randomNumber(3))
                 .createDt(new Date())
                 .build();
@@ -73,7 +75,7 @@ public class UserRestServiceTest {
 
         Date date = new Date();
         User user = User.builder()
-                .userStat("S2")
+                .userStat(Codes.USER_STAT.S9)
                 .build();
 
         log.debug("############");
