@@ -44,7 +44,7 @@ public class EventContent implements Serializable {
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	@Column(name="event_content_no")
 	@ApiModelProperty(notes = "일련번호" , hidden = true)
-	private int eventContentNo;
+	private Integer eventContentNo;
 
 	@ApiModelProperty(notes = "사용자 식별(쿠키정보로 식별)" , hidden = true , required = true)
 	@Column(name="userHash")

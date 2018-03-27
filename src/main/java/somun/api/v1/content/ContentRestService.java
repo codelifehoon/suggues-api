@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +26,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import somun.common.biz.Codes;
+import somun.exception.APIServerException;
 import somun.service.auth.WebCertService;
 import somun.service.repository.AutoComplite;
 import somun.service.repository.ContentAlarm;
 import somun.service.repository.ContentAlarmRepository;
+import somun.service.repository.ContentComment;
+import somun.service.repository.ContentCommentRepository;
+import somun.service.repository.ContentThumbUp;
 import somun.service.repository.ContentThumbUpRepository;
 import somun.service.repository.EventContent;
 import somun.service.repository.EventContentRepository;
@@ -56,6 +63,10 @@ public class ContentRestService {
 
     @Autowired
     ContentThumbUpRepository contentThumbUpRepository;
+
+    @Autowired
+    ContentCommentRepository contentCommentRepository;
+
 
     @Autowired
     WebCertService webCertService;
@@ -103,8 +114,8 @@ public class ContentRestService {
     @ResponseBody
     @ApiOperation(value="",  notes = " 이벤트 등록 API")
     @Transactional
-    public EventContent addContent (@CookieValue("webCertInfo") String webCertInfoStr
-                                    ,@RequestBody EventContent eventContent) {
+    public Integer addContent (@CookieValue("webCertInfo") String webCertInfoStr
+                                    , @RequestBody EventContent eventContent) {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
@@ -134,7 +145,7 @@ public class ContentRestService {
 
         save.setEventLocations(locations);
 
-        return save;
+        return save.getEventContentNo();
     }
 
 
@@ -142,8 +153,8 @@ public class ContentRestService {
     @ResponseBody
     @ApiOperation(value="",  notes = " 컨텐츠 알람등록 요청 API")
     @Transactional
-    public ContentAlarm addContentAlarm (@CookieValue("webCertInfo") String webCertInfoStr
-        ,@RequestBody ContentAlarm contentAlarm) {
+    public Integer addContentAlarm (@CookieValue("webCertInfo") String webCertInfoStr
+        , @RequestBody ContentAlarm contentAlarm) {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
@@ -153,23 +164,122 @@ public class ContentRestService {
         contentAlarm.setCreateDt(toDay);
         contentAlarm.setCreateNo(webCertInfo.getUser().getUserNo());
 
-        return contentAlarmRepository.save(contentAlarm);
+        return contentAlarmRepository.save(contentAlarm).getContentAlarmNo();
     }
 
     @PatchMapping(value = "/UpdateContentAlarm/{contentAlarmNo}/{useYn}")
     @ApiOperation(value="",  notes = "컨텐츠 알람 수정 요청 API")
+    @ResponseBody
     @Transactional
     public Integer UpdateContentAlarm (@CookieValue("webCertInfo") String webCertInfoStr
         , @PathVariable("contentAlarmNo") Integer contentAlarmNo , @PathVariable("useYn") String useYn) {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+        return contentAlarmRepository.updateContentAlarmStat(contentAlarmNo, webCertInfo.getUser().getUserNo(), useYn);
 
-
-        return contentAlarmRepository.updateContentAlarmStat(contentAlarmNo,webCertInfo.getUser().getUserNo(),useYn);
     }
 
 
+    @PostMapping(value = "/AddContentThumbUp")
+    @ApiOperation(value="",  notes = "컨텐츠 따봉 등록 요청 API")
+    @ResponseBody
+    @Transactional
+    public Integer AddContentThumbUp (@CookieValue("webCertInfo") String webCertInfoStr
+        , @RequestBody ContentThumbUp contentThumbUp) {
+
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        contentThumbUp.setUserNo(webCertInfo.getUser().getUserNo());
+        contentThumbUp.setUseYn("Y");
+        contentThumbUp.setCreateDt(toDay);
+        contentThumbUp.setCreateNo(webCertInfo.getUser().getUserNo());
+
+        return contentThumbUpRepository.save(contentThumbUp).getContentThumbupNo();
+
+    }
+
+
+    @PatchMapping(value = "/UpdateContentThumbUp/{contentThumbupNo}/{useYn}")
+    @ApiOperation(value="",  notes = "컨텐츠 따봉 수정 요청 API")
+    @ResponseBody
+    @Transactional
+    public Integer UpdateContentThumbUp (@CookieValue("webCertInfo") String webCertInfoStr
+        , @PathVariable("contentThumbupNo") Integer contentThumbupNo , @PathVariable("useYn") String useYn) {
+
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+        return contentThumbUpRepository.updateContentThumbUpStat(contentThumbupNo, webCertInfo.getUser().getUserNo(), useYn);
+
+    }
+
+    @PostMapping(value = "/AddContentComment")
+    @ApiOperation(value="",  notes = "컨텐츠 댓글 등록 요청 API")
+    @ResponseBody
+    @Transactional
+    public Integer AddContentComment (@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
+        , @RequestBody ContentComment contentComment) {
+
+        Date toDay = new Date();
+
+
+
+        if (StringUtils.isEmpty(webCertInfoStr) ) {
+            if ( StringUtils.isEmpty(contentComment.getCommentPw())) throw new APIServerException("비회원은 댓글 비밀번호를 필수로 입력 해야 합니다.");
+
+            contentComment.setCommentPw(DigestUtils.sha256Hex(contentComment.getCommentPw()));
+
+            contentComment.setUserNo(-1);
+            contentComment.setCreateNo(-1);
+
+        }else{
+
+            WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+            contentComment.setUserNo(webCertInfo.getUser().getUserNo());
+            contentComment.setCreateNo(webCertInfo.getUser().getUserNo());
+        }
+
+        contentComment.setStat(Codes.EV_STAT.S2);
+        contentComment.setCreateDt(toDay);
+
+        return contentCommentRepository.save(contentComment).getContentCommentNo();
+
+    }
+
+    @PostMapping(value = "/UpdateContentComment")
+    @ApiOperation(value="",  notes = "컨텐츠 댓글 수정 요청 API")
+    @ResponseBody
+    @Transactional
+    public Integer UpdateContentComment (@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
+        , @RequestBody ContentComment contentComment) {
+
+        Integer returnVal = null;
+        Date toDay = new Date();
+
+        if (StringUtils.isEmpty(webCertInfoStr)) {
+            if ( StringUtils.isEmpty(contentComment.getCommentPw())) throw new APIServerException("비회원은 댓글 비밀번호를 필수로 입력 해야 합니다.");
+            contentComment.setCommentPw(DigestUtils.sha256Hex(contentComment.getCommentPw()));
+            contentComment.setUpdateNo(-1);
+
+        }else{
+
+            WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+            contentComment.setUserNo(webCertInfo.getUser().getUserNo());
+            contentComment.setUpdateNo(webCertInfo.getUser().getUserNo());
+        }
+
+        contentComment.setUpdateDt(toDay);
+
+
+        if (StringUtils.isEmpty(webCertInfoStr)) {
+            returnVal =  contentCommentRepository.updateContentCommentNotMember(contentComment);
+        }else{
+            returnVal =  contentCommentRepository.updateContentCommentMember(contentComment);
+        }
+
+        return returnVal;
+    }
 
 
 

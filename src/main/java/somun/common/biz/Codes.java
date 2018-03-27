@@ -32,7 +32,7 @@ public class Codes {
     }
 
     // 일정상태
-    public  enum EV_STAT { S0("등록대기"), S2("등록완료"), S4("삭제");
+    public  enum EV_STAT { S0("등록대기"), S2("등록완료"), S4("삭제"), S5("등록정지");
         private String value;
         EV_STAT(String i) { this.value = i; }
 
