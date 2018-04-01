@@ -28,6 +28,8 @@ import somun.service.repository.ContentComment;
 import somun.service.repository.ContentThumbUp;
 import somun.service.repository.EventContent;
 import somun.service.repository.EventLocation;
+import somun.service.repositoryComb.ContentCommentWithUser;
+import somun.service.repositoryComb.EventContentWithUser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -214,12 +216,12 @@ public class ContentRestServiceTest {
 
 
     @Test
-    public void AddContentComment_member () {
+    public void addContentComment_member () {
         ContentComment build = ContentComment.builder().commentDesc(RandomUti.randomString(10))
                                              .eventContentNo(85)
                                              .stat(Codes.EV_STAT.S2)
                                              .build();
-        Integer body = restTemplate.exchange("/Content/V1/AddContentComment", HttpMethod.POST
+        Integer body = restTemplate.exchange("/Content/V1/addContentComment", HttpMethod.POST
             , new HttpEntity(build, requestHeaders)
             , Integer.class)
                                    .getBody();
@@ -228,13 +230,13 @@ public class ContentRestServiceTest {
     }
 
     @Test
-    public void AddContentComment_not_member () {
+    public void addContentComment_not_member () {
         ContentComment build = ContentComment.builder().commentDesc(RandomUti.randomString(10))
                                              .eventContentNo(85)
                                              .commentPw("1234")
                                              .stat(Codes.EV_STAT.S2)
                                              .build();
-        Integer body = restTemplate.exchange("/Content/V1/AddContentComment", HttpMethod.POST
+        Integer body = restTemplate.exchange("/Content/V1/addContentComment", HttpMethod.POST
             , new HttpEntity(build)
             , Integer.class)
                                    .getBody();
@@ -270,6 +272,45 @@ public class ContentRestServiceTest {
                                    .getBody();
         new LogUtil().printObject(body);
         assertThat(body).isGreaterThan(0);
+    }
+
+
+
+    @Test
+    public void findCommentList()
+    {
+        ContentCommentWithUser[] body = restTemplate.exchange("/Content/V1/findCommentList/85"
+            , HttpMethod.GET
+            , null
+            , ContentCommentWithUser[].class)
+                                                    .getBody();
+        new LogUtil().printObject(body);
+        assertThat(body).isNotNull();
+    }
+
+
+    @Test
+    public void findContentForContentMain(){
+        EventContentWithUser body = restTemplate.exchange("/Content/V1/findContentForContentMain/85"
+            , HttpMethod.GET
+            , null
+            , EventContentWithUser.class)
+                                                .getBody();
+        new LogUtil().printObject(body);
+        assertThat(body.getEventContent().getEventContentNo()).isEqualTo(85);
+
+    }
+
+    @Test
+    public void deleteContentComment(){
+        Integer body = restTemplate.exchange("/Content/V1/deleteContentComment/34"
+            , HttpMethod.PATCH
+            , new HttpEntity(null, requestHeaders)
+            , Integer.class)
+                                   .getBody();
+        new LogUtil().printObject(body);
+        assertThat(body).isNotNull();
+
     }
 
 

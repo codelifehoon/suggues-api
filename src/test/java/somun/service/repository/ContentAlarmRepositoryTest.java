@@ -1,5 +1,8 @@
 package somun.service.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,18 @@ public class ContentAlarmRepositoryTest {
         assertThat(stat).isEqualTo(1);
 
     }
+
+    @Test
+    public void findByEventContentNoInAndUseYn(){
+
+        List<Integer> eventContentNo = new  ArrayList<>();
+        eventContentNo.add(1);
+        eventContentNo.add(85);
+        List<ContentAlarm> result = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNo, "Y");
+        assertThat(result.size()).isEqualTo(2);
+    }
+
+
 
 }
 

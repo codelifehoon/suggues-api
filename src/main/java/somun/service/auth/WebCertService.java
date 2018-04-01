@@ -1,5 +1,7 @@
 package somun.service.auth;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,10 @@ public class WebCertService {
         webCertInfoStr = webCertInfoStr.replace("j:","");
         User u =  new Gson().fromJson(webCertInfoStr, User.class);
 
-        u = userRwepository.findByUserHash(u.getUserHash());
+        u = Optional.ofNullable(userRwepository.findByUserHash(u.getUserHash()))
+                    .orElse(User.builder()
+                                .userNo(0)
+                                .build());
 
         return WebCertInfo.builder().user(u).build();
 

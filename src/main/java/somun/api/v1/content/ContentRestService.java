@@ -2,12 +2,19 @@ package somun.api.v1.content;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,6 +47,10 @@ import somun.service.repository.EventContent;
 import somun.service.repository.EventContentRepository;
 import somun.service.repository.EventLocation;
 import somun.service.repository.EventLocationRepository;
+import somun.service.repository.User;
+import somun.service.repository.UserRepository;
+import somun.service.repositoryComb.ContentCommentWithUser;
+import somun.service.repositoryComb.EventContentWithUser;
 import somun.service.repositoryComb.WebCertInfo;
 @Slf4j
 @Controller
@@ -67,6 +78,10 @@ public class ContentRestService {
     @Autowired
     ContentCommentRepository contentCommentRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
+
 
     @Autowired
     WebCertService webCertService;
@@ -89,26 +104,118 @@ public class ContentRestService {
     }
 
 
-    @GetMapping("/findContentList/{searchText}/{latitude}/{longitude}")
+    @GetMapping("/findContentList/{searchText}/{searchDate}/{latitude}/{longitude}")
     @ResponseBody
     @ApiOperation(value="",  notes = "이벤트 조회  API")
-    public List<EventContent> findEventList(@CookieValue(value = "userHash" , defaultValue = "") String userHash
-                                                    , @PathVariable("searchText")  String searchText
-                                                    , @PathVariable("latitude")  Long latitude
-                                                    , @PathVariable("longitude")  Long longitude ) {
+    public Page<EventContentWithUser> findEventList(@CookieValue(value = "webCertInfo" , defaultValue ="") String webCertInfoStr
+        , @PageableDefault(size=10, sort="eventContentNo", direction = Sort.Direction.DESC ) Pageable pageable
+        , @PathVariable("searchText")  String searchText
+        , @PathVariable("searchDate")  Date searchDate
+        , @PathVariable("latitude")  Long latitude
+        , @PathVariable("longitude")  Long longitude ) {
 
-        List<EventContent> eventContents = new ArrayList<>();
-        List<EventLocation>  eventLocations = new ArrayList<>();
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
 
-        eventContentRepository.findAll().forEach(eventContents::add);
+        Page<EventContent> eventContentPage = eventContentRepository.findByStat(Codes.EV_STAT.S2, pageable);
+        List<EventContent> eventContents = eventContentPage.getContent();
 
-        for(EventContent eventContent : eventContents){
-            eventContent.setEventLocations(eventLocationRepository.findByEventContentNo(eventContent.getEventContentNo()));
-        }
+        List<Integer> eventContentNoList = eventContents.stream().map(EventContent::getEventContentNo).collect(Collectors.toList());
+        List<Integer> userNos = eventContents.stream().map(EventContent::getCreateNo).collect(Collectors.toList());
 
-        return eventContents;
+
+
+        HashMap<Integer, ContentThumbUp> contentThumbUpHashMap = contentThumbUpRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
+                                                                     .stream()
+                                                                     .collect(Collectors.toMap(ContentThumbUp::getEventContentNo,
+                                                                                               Function.identity(),
+                                                                                               (o, n) -> o,
+                                                                                               HashMap::new));
+        HashMap<Integer, ContentAlarm> contentAlarmHashMap = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
+                                                                 .stream()
+                                                                 .collect(Collectors.toMap(ContentAlarm::getEventContentNo,
+                                                                                           Function.identity(),
+                                                                                           (o, n) -> o,
+                                                                                           HashMap::new));
+        HashMap<Integer, User> userHashMap = userRepository.findByUserNoIn(userNos)
+                                                       .stream().collect(Collectors.toMap(User::getUserNo,
+                                                                                          Function.identity(),
+                                                                                          (o, n) -> o,
+                                                                                          HashMap::new));
+
+
+//
+//        for (EventContent eventContent : eventContents){
+//            EventContentWithUser eventContentWithUser = EventContentWithUser.builder()
+//                                                                            .eventContent(eventContent)
+//                                                                            .contentThumbUp(contentThumbUpHashMap.get(eventContent.getEventContentNo()))
+//                                                                            .contentAlarm(contentAlarmHashMap.get(eventContent.getEventContentNo()))
+//                                                                            .user(userHashMap.get(eventContent.getCreateNo()))
+//                                                                            .commentCnt(contentCommentRepository.countByEventContentNoAndStat(eventContent.getEventContentNo(), Codes.EV_STAT.S2))
+//                                                                            .build();
+//        //  do location-value each fetch if It can be a lot of value
+//            eventContentWithUser.getEventContent().setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContent.getEventContentNo(), "Y"));
+//
+//
+//            eventContentWithUsers.add(eventContentWithUser);
+//        }
+
+        // 1.binding VOs to EventContentWithUser
+        // 2.convert  VOs to page Object
+        Page<EventContentWithUser> eventContentWithUsers = eventContentPage.map(d -> {
+            EventContentWithUser eventContentWithUser = EventContentWithUser.builder()
+                                                                            .eventContent(d)
+                                                                            .contentThumbUp(Optional.ofNullable(contentThumbUpHashMap.get(d.getEventContentNo()))
+                                                                                                    .orElse(ContentThumbUp.builder()
+                                                                                                                          .build())
+                                                                            )
+                                                                            .contentAlarm(Optional.ofNullable(contentAlarmHashMap.get(d.getEventContentNo()))
+                                                                                                  .orElse(ContentAlarm.builder()
+                                                                                                                      .build())
+                                                                            )
+                                                                            .user(userHashMap.get(d.getCreateNo()))
+                                                                            .commentCnt(contentCommentRepository.countByEventContentNoAndStat(d.getEventContentNo(),Codes.EV_STAT.S2))
+                                                                            .build();
+            //  do location-value each fetch if It can be a lot of value
+            eventContentWithUser.getEventContent()
+                                .setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(d.getEventContentNo(),"Y"));
+            return eventContentWithUser;
+        });
+
+        return eventContentWithUsers;
+
+}
+
+
+    @GetMapping("/findContentForContentMain/{eventContentNo}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = "컨텐츠메인에 사용할 정보 조회 API")
+    public EventContentWithUser findContentForContentMain(@CookieValue("webCertInfo") String webCertInfoStr
+        , @PathVariable("eventContentNo")  Integer eventContentNo) {
+
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        EventContent eventContent = eventContentRepository.findOne(eventContentNo);
+        eventContent.setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContentNo,"Y"));
+        ContentThumbUp contentThumbUp = Optional.ofNullable(contentThumbUpRepository
+                                                                .findFirstByEventContentNoAndUseYnAndUserNo(eventContentNo,"Y",webCertInfo.getUser().getUserNo()))
+                                   .orElse(ContentThumbUp.builder().build());
+        ContentAlarm contentAlarm = Optional.ofNullable(contentAlarmRepository
+                                                            .findFirstByEventContentNoAndUseYnAndUserNo(eventContentNo,"Y",webCertInfo.getUser().getUserNo()))
+                                    .orElse(ContentAlarm.builder().build());
+
+
+        eventContent.setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContent.getEventContentNo(), "Y"));
+
+        return EventContentWithUser.builder()
+                                                         .eventContent(eventContent)
+                                                         .user(userRepository.findByUserNo(eventContent.getCreateNo()))
+                                                           .contentThumbUp(contentThumbUp)
+                                                           .contentAlarm(contentAlarm)
+                                                           .commentCnt(contentCommentRepository.countByEventContentNoAndStat(eventContentNo, Codes.EV_STAT.S2))
+                                                         .build();
     }
-
 
     @PostMapping(value = "/AddContent")
     @ResponseBody
@@ -119,8 +226,6 @@ public class ContentRestService {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-
-
 
         eventContent.setUserHash(webCertInfo.getUser().getUserHash());
         eventContent.setCreateDt(toDay);
@@ -214,11 +319,58 @@ public class ContentRestService {
 
     }
 
-    @PostMapping(value = "/AddContentComment")
+    @GetMapping("/findCommentList/{eventContentNo}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = "컨텐츠의 전체댓글 조회  API")
+    public List<ContentCommentWithUser> findEventList(@CookieValue(value = "userHash" , defaultValue = "") String userHash
+        ,@PathVariable("eventContentNo") Integer eventContentNo
+        ) {
+
+        // comment list get
+        List<ContentComment> contentComments = contentCommentRepository.findByEventContentNoAndStatOrderByCreateDtDesc(eventContentNo,Codes.EV_STAT.S2);
+        List<Integer> userNos = contentComments.stream().map(ContentComment::getUserNo).collect(Collectors.toList());
+
+        // userNo list를 이용해서 사용자 정보 list로 가져와서 map으로 변환
+        Map<Integer, User> userMap = userRepository.findByUserNoIn(userNos)
+                                          .stream().collect(Collectors.toMap(User::getUserNo,
+                                                                             Function.identity(),
+                                                                             (o,n) -> o,
+                                                                             HashMap::new));
+
+        // 조회한 comment리스트와 user list를 합쳐서 리턴
+        return contentComments.stream().map(d -> {
+            return ContentCommentWithUser.builder()
+                                         .contentComment(d)
+                                         .user(userMap.get(d.getUserNo()))
+                                         .build();
+        }).collect(Collectors.toList());
+
+    }
+
+    @GetMapping("/findOneComment/{contentCommentNo}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = "컨텐츠의 개별댓글 상세정보 조회  API")
+    public ContentCommentWithUser findOneComment(@CookieValue(value = "userHash" , defaultValue = "") String userHash
+        ,@PathVariable("contentCommentNo") Integer contentCommentNo)
+     {
+         ContentComment contentComment = contentCommentRepository.findByContentCommentNoAndStat(contentCommentNo,Codes.EV_STAT.S2);
+
+         // 조회한 comment리스트와 user list를 합쳐서 리턴
+        return ContentCommentWithUser.builder()
+                                     .contentComment(contentComment)
+                                     .user(userRepository.findByUserNo(contentComment.getUserNo()))
+                                     .build();
+    }
+
+
+
+
+
+    @PostMapping(value = "/addContentComment")
     @ApiOperation(value="",  notes = "컨텐츠 댓글 등록 요청 API")
     @ResponseBody
     @Transactional
-    public Integer AddContentComment (@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
+    public Integer addContentComment (@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
         , @RequestBody ContentComment contentComment) {
 
         Date toDay = new Date();
@@ -247,39 +399,50 @@ public class ContentRestService {
 
     }
 
-    @PostMapping(value = "/UpdateContentComment")
+    @PatchMapping(value = "/updateContentComment")
     @ApiOperation(value="",  notes = "컨텐츠 댓글 수정 요청 API")
     @ResponseBody
     @Transactional
-    public Integer UpdateContentComment (@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
+    public Integer updateContentComment (@CookieValue(value = "webCertInfo" ) String webCertInfoStr
         , @RequestBody ContentComment contentComment) {
 
         Integer returnVal = null;
         Date toDay = new Date();
 
-        if (StringUtils.isEmpty(webCertInfoStr)) {
-            if ( StringUtils.isEmpty(contentComment.getCommentPw())) throw new APIServerException("비회원은 댓글 비밀번호를 필수로 입력 해야 합니다.");
-            contentComment.setCommentPw(DigestUtils.sha256Hex(contentComment.getCommentPw()));
-            contentComment.setUpdateNo(-1);
 
-        }else{
 
-            WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-            contentComment.setUserNo(webCertInfo.getUser().getUserNo());
-            contentComment.setUpdateNo(webCertInfo.getUser().getUserNo());
-        }
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+        contentComment.setUserNo(webCertInfo.getUser().getUserNo());
+        contentComment.setUpdateNo(webCertInfo.getUser().getUserNo());
 
         contentComment.setUpdateDt(toDay);
 
 
-        if (StringUtils.isEmpty(webCertInfoStr)) {
-            returnVal =  contentCommentRepository.updateContentCommentNotMember(contentComment);
-        }else{
-            returnVal =  contentCommentRepository.updateContentCommentMember(contentComment);
-        }
+
+        returnVal =  contentCommentRepository.updateContentComment(contentComment);
+
 
         return returnVal;
     }
+
+    @PatchMapping(value = "/deleteContentComment/{contentCommentNo}")
+    @ApiOperation(value="",  notes = "컨텐츠 댓글 삭제 요청 API")
+    @ResponseBody
+    @Transactional
+    public Integer deleteContentComment (@CookieValue(value = "webCertInfo") String webCertInfoStr
+        , @PathVariable("contentCommentNo") Integer contentCommentNo) {
+
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        return contentCommentRepository.updateContentCommentStat(ContentComment.builder()
+                                                                               .stat(Codes.EV_STAT.S4)
+                                                                               .userNo(webCertInfo.getUser().getUserNo())
+                                                                               .contentCommentNo(contentCommentNo)
+                                                                               .updateDt(new Date())
+                                                                               .updateNo(webCertInfo.getUser().getUserNo())
+                                                                               .build());
+    }
+
 
 
 

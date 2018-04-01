@@ -22,7 +22,6 @@ import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
 
-
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration("classpath:application-context.xml")
 @Slf4j
@@ -62,8 +61,8 @@ public class UserRepositoryTest {
 
     @Test
     public void findByUserNo(){
-        List<User> userList = userRepository.findByUserNo(2);
-        new LogUtil().printObjectList(userList);
+        User userList = userRepository.findByUserNo(2);
+        new LogUtil().printObject(userList);
     }
 
     @Test
@@ -96,7 +95,7 @@ public class UserRepositoryTest {
 
     @Test
     public void findOne(){
-        new LogUtil().printObjectList(userRepository.findByUserNo(89));
+        new LogUtil().printObject(userRepository.findByUserNo(89));
     }
 
 
@@ -194,7 +193,6 @@ public class UserRepositoryTest {
                 .orElse(User.builder().build());
 
         new LogUtil().printObject(user);
-
 
     }
 

@@ -14,11 +14,13 @@ public interface UserRepository extends CrudRepository<User,Integer> , PagingAnd
 
     public Iterable<User> findByUserNm(User user);
     public List<User> findByUserNm(String userNm);
-    public List<User> findByUserNo(int userNo);
+    public User findByUserNo(Integer userNo);
+    public List<User> findByUserNoIn(List<Integer> userNo);
     public List<User> findByUserNmStartingWith(String userNm);
     public List<User> findByUserNmEndingWith(String userNm);
     public List<User> findByUserNmIsContaining(String userNm);
     public User findByUserHash(String userHash);
+
 
 //    public List<User> findTop10(Pageable pageable);
     public List<User> findTop10ByUserNoGreaterThan(int usrNo);
