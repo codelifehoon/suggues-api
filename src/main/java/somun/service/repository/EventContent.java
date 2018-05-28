@@ -11,11 +11,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -37,7 +39,8 @@ import somun.common.biz.Codes;
 @Slf4j
 @Entity
 @Table(name="event_content")
-//@NamedQuery(name="EventContent.findAll", query="SELECT e FROM EventContent e")
+@DynamicUpdate(value=true)
+@NamedQuery(name="EventContent.findAll", query="SELECT e FROM EventContent e")
 public class EventContent implements Serializable {
 
 	@Id
@@ -57,6 +60,15 @@ public class EventContent implements Serializable {
 	@ApiModelProperty(notes = "Event 상세", required = true)
 	@Column(name="event_desc")
 	private String eventDesc;
+
+
+    @ApiModelProperty(notes = "Event 상세의 텍스트 정보", hidden = true)
+	@Column(name="event_desc_text")
+	private String eventDescText;
+
+	@ApiModelProperty(notes = "Event 상세의 이미지 정보",hidden = true)
+	@Column(name="event_desc_thumbnails")
+	private String eventDescThumbnails;
 
     @ApiModelProperty(notes = "Event 시작일")
     @Temporal(TemporalType.TIMESTAMP)
@@ -98,7 +110,7 @@ public class EventContent implements Serializable {
     @ApiModelProperty(notes = "생성일", hidden = true , required = true)
     @Temporal(TemporalType.TIMESTAMP)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	@Column(name="create_dt")
+	@Column(name="create_dt",nullable = false, updatable = false)
 	private Date createDt;
 
     @ApiModelProperty(notes = "수정자", hidden = true )
@@ -110,4 +122,12 @@ public class EventContent implements Serializable {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name="update_dt")
 	private Date updateDt;
+
+    public void setEventDescText(String eventDescText) {
+        int maxLength = eventDescText.length();
+        if (maxLength > 7990) maxLength = 7990;
+        this.eventDescText = eventDescText.substring(0,maxLength);
+    }
+
+
 }

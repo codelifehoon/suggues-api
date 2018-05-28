@@ -20,7 +20,10 @@ public class WebCertService {
     public WebCertInfo webCertInfoBuild(String webCertInfoStr){
 
         webCertInfoStr = webCertInfoStr.replace("j:","");
-        User u =  new Gson().fromJson(webCertInfoStr, User.class);
+        User u =  Optional.ofNullable(new Gson().fromJson(webCertInfoStr, User.class))
+                        .orElse(User.builder()
+                                   .userNo(0)
+                                   .build());
 
         u = Optional.ofNullable(userRwepository.findByUserHash(u.getUserHash()))
                     .orElse(User.builder()

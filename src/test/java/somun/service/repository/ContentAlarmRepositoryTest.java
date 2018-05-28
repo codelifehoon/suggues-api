@@ -1,6 +1,7 @@
 package somun.service.repository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -26,14 +27,25 @@ public class ContentAlarmRepositoryTest {
 
     @Test
     public void updateContentAlarmStat_notUpdate(){
-        Integer stat = contentAlarmRepository.updateContentAlarmStat(1, 1, "Y");
+        Integer stat = contentAlarmRepository.updateContentAlarmStat(ContentAlarm.builder()
+                                                                                 .contentAlarmNo(1)
+                                                                                 .updateDt(new Date())
+                                                                                 .updateNo(1)
+                                                                                 .useYn("N")
+                                                                                 .build());
         assertThat(stat).isEqualTo(0);
 
     }
 
     @Test
     public void updateContentAlarmStat_Update(){
-        Integer stat = contentAlarmRepository.updateContentAlarmStat(2, 30, "Y");
+
+        Integer stat = contentAlarmRepository.updateContentAlarmStat(ContentAlarm.builder()
+                                                                                 .contentAlarmNo(2)
+                                                                                 .updateDt(new Date())
+                                                                                 .updateNo(30)
+                                                                                 .useYn("N")
+                                                                                 .build());
         assertThat(stat).isEqualTo(1);
 
     }
@@ -41,10 +53,10 @@ public class ContentAlarmRepositoryTest {
     @Test
     public void findByEventContentNoInAndUseYn(){
 
-        List<Integer> eventContentNo = new  ArrayList<>();
-        eventContentNo.add(1);
-        eventContentNo.add(85);
-        List<ContentAlarm> result = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNo, "Y");
+        List<Integer> eventContentNos = new  ArrayList<>();
+        eventContentNos.add(1);
+        eventContentNos.add(85);
+        List<ContentAlarm> result = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNos, "Y");
         assertThat(result.size()).isEqualTo(2);
     }
 

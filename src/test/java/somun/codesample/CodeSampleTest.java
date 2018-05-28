@@ -16,6 +16,7 @@ public class CodeSampleTest {
     public void cookieConverter()
     {
 
+
         String webCertInfoStr ="j:{\"userHash\":\"21474836247\"}";
 
         webCertInfoStr = webCertInfoStr.replace("j:","");

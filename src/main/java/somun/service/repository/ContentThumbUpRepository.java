@@ -16,4 +16,5 @@ public interface ContentThumbUpRepository extends CrudRepository<ContentThumbUp,
 
     ContentThumbUp findFirstByEventContentNoAndUseYnAndUserNo(Integer eventContentNo, String y, Integer userNo);
     List<ContentThumbUp> findByEventContentNoInAndUseYn(List<Integer> eventContentNo, String y);
+
 }

@@ -1,5 +1,7 @@
 package somun.api.v1.content;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -29,14 +32,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
+import somun.common.util.JsoupExtends;
 import somun.exception.APIServerException;
 import somun.service.auth.WebCertService;
 import somun.service.repository.AutoComplite;
+import somun.service.repository.ContentActivity;
+import somun.service.repository.ContentActivityRepository;
 import somun.service.repository.ContentAlarm;
 import somun.service.repository.ContentAlarmRepository;
 import somun.service.repository.ContentComment;
@@ -49,9 +57,12 @@ import somun.service.repository.EventLocation;
 import somun.service.repository.EventLocationRepository;
 import somun.service.repository.User;
 import somun.service.repository.UserRepository;
+import somun.service.repositoryComb.ContentActivityComb;
 import somun.service.repositoryComb.ContentCommentWithUser;
 import somun.service.repositoryComb.EventContentWithUser;
 import somun.service.repositoryComb.WebCertInfo;
+import springfox.documentation.annotations.ApiIgnore;
+
 @Slf4j
 @Controller
 @CrossOrigin(origins = "*")
@@ -81,7 +92,8 @@ public class ContentRestService {
     @Autowired
     UserRepository userRepository;
 
-
+    @Autowired
+    ContentActivityRepository contentActivityRepository;
 
     @Autowired
     WebCertService webCertService;
@@ -104,20 +116,42 @@ public class ContentRestService {
     }
 
 
-    @GetMapping("/findContentList/{searchText}/{searchDate}/{latitude}/{longitude}")
+    @GetMapping("/findEventList/{searchText}/{searchDate}/{latitude}/{longitude}")
     @ResponseBody
-    @ApiOperation(value="",  notes = "이벤트 조회  API")
+    @ApiOperation(value="",  notes = "컨텐츠 통합검색  API")
+    @ApiImplicitParams({
+                           @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query", value = "Results page you want to retrieve (0..N)"),
+                           @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query", value = "Number of records per page."),
+                           @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query", value = "Sorting criteria in the format: property(,asc|desc). " +
+                                                                                                                                     "Default sort order is ascending. " +
+                                                                                                                                     "Multiple sort criteria are supported.")
+                       })
     public Page<EventContentWithUser> findEventList(@CookieValue(value = "webCertInfo" , defaultValue ="") String webCertInfoStr
-        , @PageableDefault(size=10, sort="eventContentNo", direction = Sort.Direction.DESC ) Pageable pageable
+        , @ApiIgnore @PageableDefault(page=0, size=20) Pageable pageable
         , @PathVariable("searchText")  String searchText
-        , @PathVariable("searchDate")  Date searchDate
+        , @PathVariable("searchDate")  String searchDateStr
         , @PathVariable("latitude")  Long latitude
-        , @PathVariable("longitude")  Long longitude ) {
+        , @PathVariable("longitude")  Long longitude ) throws ParseException {
 
-        Date toDay = new Date();
+//        http://localhost:8080/Content/V1/findEventList/initSearch/2018-05-18/0/0?page=0
+        Date searchDate = null;
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+        Page<EventContent> eventContentPage ;
 
-        Page<EventContent> eventContentPage = eventContentRepository.findByStat(Codes.EV_STAT.S2, pageable);
+        if (!"모든날짜".equals(searchDateStr)) searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+
+        if ("initSearch".equals(searchText)) {
+            PageRequest defaultPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), new Sort(Sort.Direction.DESC, "eventContentNo")); //현재페이지, 조회할 페이지수, 정렬정보
+
+            if (!"모든날짜".equals(searchDateStr))
+                eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2 , searchDate, searchDate, defaultPageable);
+            else
+                eventContentPage = eventContentRepository.findByStat(Codes.EV_STAT.S2, defaultPageable);
+        }
+        else {
+            eventContentPage = eventContentRepository.findAllContent(searchText, Codes.EV_STAT.S2.toString(),searchDate, pageable);
+        }
+
         List<EventContent> eventContents = eventContentPage.getContent();
 
         List<Integer> eventContentNoList = eventContents.stream().map(EventContent::getEventContentNo).collect(Collectors.toList());
@@ -126,39 +160,23 @@ public class ContentRestService {
 
 
         HashMap<Integer, ContentThumbUp> contentThumbUpHashMap = contentThumbUpRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
-                                                                     .stream()
-                                                                     .collect(Collectors.toMap(ContentThumbUp::getEventContentNo,
-                                                                                               Function.identity(),
-                                                                                               (o, n) -> o,
-                                                                                               HashMap::new));
+                                                                                         .stream()
+                                                                                         .collect(Collectors.toMap(ContentThumbUp::getEventContentNo,
+                                                                                                                   Function.identity(),
+                                                                                                                   (o, n) -> o,
+                                                                                                                   HashMap::new));
         HashMap<Integer, ContentAlarm> contentAlarmHashMap = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
-                                                                 .stream()
-                                                                 .collect(Collectors.toMap(ContentAlarm::getEventContentNo,
-                                                                                           Function.identity(),
-                                                                                           (o, n) -> o,
-                                                                                           HashMap::new));
+                                                                                   .stream()
+                                                                                   .collect(Collectors.toMap(ContentAlarm::getEventContentNo,
+                                                                                                             Function.identity(),
+                                                                                                             (o, n) -> o,
+                                                                                                             HashMap::new));
         HashMap<Integer, User> userHashMap = userRepository.findByUserNoIn(userNos)
-                                                       .stream().collect(Collectors.toMap(User::getUserNo,
-                                                                                          Function.identity(),
-                                                                                          (o, n) -> o,
-                                                                                          HashMap::new));
+                                                           .stream().collect(Collectors.toMap(User::getUserNo,
+                                                                                              Function.identity(),
+                                                                                              (o, n) -> o,
+                                                                                              HashMap::new));
 
-
-//
-//        for (EventContent eventContent : eventContents){
-//            EventContentWithUser eventContentWithUser = EventContentWithUser.builder()
-//                                                                            .eventContent(eventContent)
-//                                                                            .contentThumbUp(contentThumbUpHashMap.get(eventContent.getEventContentNo()))
-//                                                                            .contentAlarm(contentAlarmHashMap.get(eventContent.getEventContentNo()))
-//                                                                            .user(userHashMap.get(eventContent.getCreateNo()))
-//                                                                            .commentCnt(contentCommentRepository.countByEventContentNoAndStat(eventContent.getEventContentNo(), Codes.EV_STAT.S2))
-//                                                                            .build();
-//        //  do location-value each fetch if It can be a lot of value
-//            eventContentWithUser.getEventContent().setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContent.getEventContentNo(), "Y"));
-//
-//
-//            eventContentWithUsers.add(eventContentWithUser);
-//        }
 
         // 1.binding VOs to EventContentWithUser
         // 2.convert  VOs to page Object
@@ -175,6 +193,7 @@ public class ContentRestService {
                                                                             )
                                                                             .user(userHashMap.get(d.getCreateNo()))
                                                                             .commentCnt(contentCommentRepository.countByEventContentNoAndStat(d.getEventContentNo(),Codes.EV_STAT.S2))
+                                                                            .isEqualLoginUser(webCertInfo.getUser().getUserNo() == d.getCreateNo())
                                                                             .build();
             //  do location-value each fetch if It can be a lot of value
             eventContentWithUser.getEventContent()
@@ -184,13 +203,13 @@ public class ContentRestService {
 
         return eventContentWithUsers;
 
-}
+    }
 
 
     @GetMapping("/findContentForContentMain/{eventContentNo}")
     @ResponseBody
     @ApiOperation(value="",  notes = "컨텐츠메인에 사용할 정보 조회 API")
-    public EventContentWithUser findContentForContentMain(@CookieValue("webCertInfo") String webCertInfoStr
+    public EventContentWithUser findContentForContentMain(@CookieValue(value = "webCertInfo" , defaultValue = "") String webCertInfoStr
         , @PathVariable("eventContentNo")  Integer eventContentNo) {
 
         Date toDay = new Date();
@@ -209,17 +228,18 @@ public class ContentRestService {
         eventContent.setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContent.getEventContentNo(), "Y"));
 
         return EventContentWithUser.builder()
-                                                         .eventContent(eventContent)
-                                                         .user(userRepository.findByUserNo(eventContent.getCreateNo()))
-                                                           .contentThumbUp(contentThumbUp)
-                                                           .contentAlarm(contentAlarm)
-                                                           .commentCnt(contentCommentRepository.countByEventContentNoAndStat(eventContentNo, Codes.EV_STAT.S2))
-                                                         .build();
+                                   .eventContent(eventContent)
+                                   .user(userRepository.findByUserNo(eventContent.getCreateNo()))
+                                   .contentThumbUp(contentThumbUp)
+                                   .contentAlarm(contentAlarm)
+                                   .commentCnt(contentCommentRepository.countByEventContentNoAndStat(eventContentNo, Codes.EV_STAT.S2))
+                                   .isEqualLoginUser(webCertInfo.getUser().getUserNo() == eventContent.getCreateNo())
+                                   .build();
     }
 
-    @PostMapping(value = "/AddContent")
+    @PostMapping(value = "/addContent")
     @ResponseBody
-    @ApiOperation(value="",  notes = " 이벤트 등록 API")
+    @ApiOperation(value="",  notes = " 컨텐츠 등록 API")
     @Transactional
     public Integer addContent (@CookieValue("webCertInfo") String webCertInfoStr
                                     , @RequestBody EventContent eventContent) {
@@ -230,6 +250,8 @@ public class ContentRestService {
         eventContent.setUserHash(webCertInfo.getUser().getUserHash());
         eventContent.setCreateDt(toDay);
         eventContent.setCreateNo(webCertInfo.getUser().getUserNo());
+        eventContent.setEventDescText(JsoupExtends.text(eventContent.getEventDesc()));
+        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
 
         EventContent save = eventContentRepository.save(eventContent);
 
@@ -247,14 +269,122 @@ public class ContentRestService {
         List<EventLocation> locations = new ArrayList<>();
 
         eventLocationRepository.save(eventLocations).forEach(locations::add);
-
         save.setEventLocations(locations);
+
+        ContentActivity ca = ContentActivity.builder()
+                                            .activityRefNo(save.getEventContentNo())
+                                            .activityCode(Codes.ACTIVITY_CODE.CONTENT)
+                                            .activityStat(Codes.getActivityCode(save.getStat()))
+                                            .createDt(toDay)
+                                            .createNo(webCertInfo.getUser().getUserNo())
+                                            .build();
+        contentActivityRepository.save(ca);
+
+
 
         return save.getEventContentNo();
     }
 
+    @PostMapping(value = "/updateContent/{eventContentNo}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = " 컨텐츠 수정")
+    @Transactional
+    public Integer updateContent (@CookieValue("webCertInfo") String webCertInfoStr
+        , @PathVariable("eventContentNo") Integer eventContentNo
+        , @RequestBody EventContent eventContent) {
 
-    @PostMapping(value = "/AddContentAlarm")
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        EventContent findContent = eventContentRepository.findOne(eventContentNo);
+        if (!findContent.getCreateNo().equals(webCertInfo.getUser().getUserNo())) throw new APIServerException("it's not same user.");
+
+/*
+        save.setUpdateDt(toDay);
+        save.setUpdateNo(webCertInfo.getUser().getUserNo());
+        save.setTitle(eventContent.getTitle());
+        save.setEventDesc(eventContent.getEventDesc());
+        save.setTags(eventContent.getTags());
+        save.setEventStart(eventContent.getEventStart());
+        save.setEventEnd(eventContent.getEventEnd());
+        save.setRefPath(eventContent.getRefPath());
+        save.setRepeatKind(eventContent.getRepeatKind());
+        */
+
+        eventContent.setEventContentNo(findContent.getEventContentNo());
+        eventContent.setUserHash(findContent.getUserHash());
+        eventContent.setStat(findContent.getStat());
+        eventContent.setCreateDt(findContent.getCreateDt());
+        eventContent.setCreateNo(findContent.getCreateNo());
+
+        eventContent.setUpdateDt(toDay);
+        eventContent.setUpdateNo(webCertInfo.getUser().getUserNo());
+        eventContent.setEventDescText(JsoupExtends.text(eventContent.getEventDesc()));
+        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
+
+
+        eventContentRepository.save(eventContent);
+
+        List<EventLocation> eventLocations = Optional.ofNullable(eventContent.getEventLocations())
+                                                     .orElse(new ArrayList<>())
+                                                     .stream().map(d -> {
+                d.setEventContentNo(findContent.getEventContentNo());
+                d.setCreateDt(toDay);
+                d.setCreateNo(webCertInfo.getUser().getUserNo());
+                return d;
+            }).collect(Collectors.toList());
+
+        List<EventLocation> locations = new ArrayList<>();
+
+
+        eventLocationRepository.updateContentLocationStat(EventLocation.builder()
+                                                                       .eventContentNo(eventContent.getEventContentNo())
+                                                                       .createNo(webCertInfo.getUser().getUserNo())
+                                                                       .useYn("N")
+                                                                       .updateNo(webCertInfo.getUser().getUserNo())
+                                                                       .updateDt(toDay)
+                                                                       .build());
+
+        eventLocationRepository.save(eventLocations).forEach(locations::add);
+        findContent.setEventLocations(locations);
+
+
+        return findContent.getEventContentNo();
+    }
+
+    @PatchMapping(value = "/updateContentStat/{eventContentNo}/{stat}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = " 컨텐츠 수정")
+    @Transactional
+    public Integer updateContentStat (@CookieValue("webCertInfo") String webCertInfoStr
+        ,@PathVariable("eventContentNo") Integer eventContentNo
+        ,@PathVariable("stat") Codes.EV_STAT stat
+        ) {
+
+        Date toDay = new Date();
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        eventContentRepository.updateContentStat(EventContent.builder()
+                                                        .eventContentNo(eventContentNo)
+                                                        .updateDt(toDay)
+                                                        .updateNo(webCertInfo.getUser().getUserNo())
+                                                        .stat(stat)
+                                                        .build());
+
+        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+                                                      .activityRefNo(eventContentNo)
+                                                      .activityCode(Codes.ACTIVITY_CODE.CONTENT)
+                                                      .activityStat(Codes.getActivityCode(stat))
+                                                      .updateDt(toDay)
+                                                      .updateNo(webCertInfo.getUser().getUserNo())
+                                                      .build());
+        return eventContentNo;
+    }
+
+
+
+
+    @PostMapping(value = "/addContentAlarm")
     @ResponseBody
     @ApiOperation(value="",  notes = " 컨텐츠 알람등록 요청 API")
     @Transactional
@@ -272,7 +402,7 @@ public class ContentRestService {
         return contentAlarmRepository.save(contentAlarm).getContentAlarmNo();
     }
 
-    @PatchMapping(value = "/UpdateContentAlarm/{contentAlarmNo}/{useYn}")
+    @PatchMapping(value = "/updateContentAlarm/{contentAlarmNo}/{useYn}")
     @ApiOperation(value="",  notes = "컨텐츠 알람 수정 요청 API")
     @ResponseBody
     @Transactional
@@ -281,16 +411,35 @@ public class ContentRestService {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-        return contentAlarmRepository.updateContentAlarmStat(contentAlarmNo, webCertInfo.getUser().getUserNo(), useYn);
+
+
+
+
+        Integer updateCount = contentAlarmRepository.updateContentAlarmStat( ContentAlarm.builder()
+                                                                                         .contentAlarmNo(contentAlarmNo)
+                                                                                         .updateDt(toDay)
+                                                                                         .updateNo(webCertInfo.getUser().getUserNo())
+                                                                                         .useYn(useYn)
+                                                                                         .build());
+
+        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+                                                                           .activityRefNo(contentAlarmNo)
+                                                                           .activityCode(Codes.ACTIVITY_CODE.ALARM)
+                                                                           .activityStat(Codes.getActivityCode(useYn))
+                                                                           .updateDt(toDay)
+                                                                           .updateNo(webCertInfo.getUser().getUserNo())
+                                                                           .build());
+
+        return updateCount;
 
     }
 
 
-    @PostMapping(value = "/AddContentThumbUp")
+    @PostMapping(value = "/addContentThumbUp")
     @ApiOperation(value="",  notes = "컨텐츠 따봉 등록 요청 API")
     @ResponseBody
     @Transactional
-    public Integer AddContentThumbUp (@CookieValue("webCertInfo") String webCertInfoStr
+    public Integer addContentThumbUp(@CookieValue("webCertInfo") String webCertInfoStr
         , @RequestBody ContentThumbUp contentThumbUp) {
 
         Date toDay = new Date();
@@ -306,17 +455,25 @@ public class ContentRestService {
     }
 
 
-    @PatchMapping(value = "/UpdateContentThumbUp/{contentThumbupNo}/{useYn}")
+    @PatchMapping(value = "/updateContentThumbUp/{contentThumbupNo}/{useYn}")
     @ApiOperation(value="",  notes = "컨텐츠 따봉 수정 요청 API")
     @ResponseBody
     @Transactional
-    public Integer UpdateContentThumbUp (@CookieValue("webCertInfo") String webCertInfoStr
+    public Integer updateContentThumbUp(@CookieValue("webCertInfo") String webCertInfoStr
         , @PathVariable("contentThumbupNo") Integer contentThumbupNo , @PathVariable("useYn") String useYn) {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-        return contentThumbUpRepository.updateContentThumbUpStat(contentThumbupNo, webCertInfo.getUser().getUserNo(), useYn);
+        Integer updateCount = contentThumbUpRepository.updateContentThumbUpStat(contentThumbupNo, webCertInfo.getUser().getUserNo(), useYn);
+        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+                                                                           .activityRefNo(contentThumbupNo)
+                                                                           .activityCode(Codes.ACTIVITY_CODE.THUMBSUP)
+                                                                           .activityStat(Codes.getActivityCode(useYn))
+                                                                           .updateDt(toDay)
+                                                                           .updateNo(webCertInfo.getUser().getUserNo())
+                                                                           .build());
 
+        return updateCount;
     }
 
     @GetMapping("/findCommentList/{eventContentNo}")
@@ -375,8 +532,6 @@ public class ContentRestService {
 
         Date toDay = new Date();
 
-
-
         if (StringUtils.isEmpty(webCertInfoStr) ) {
             if ( StringUtils.isEmpty(contentComment.getCommentPw())) throw new APIServerException("비회원은 댓글 비밀번호를 필수로 입력 해야 합니다.");
 
@@ -403,10 +558,10 @@ public class ContentRestService {
     @ApiOperation(value="",  notes = "컨텐츠 댓글 수정 요청 API")
     @ResponseBody
     @Transactional
-    public Integer updateContentComment (@CookieValue(value = "webCertInfo" ) String webCertInfoStr
+    public Integer updateContentComment (@CookieValue(value = "webCertInfo") String webCertInfoStr
         , @RequestBody ContentComment contentComment) {
 
-        Integer returnVal = null;
+
         Date toDay = new Date();
 
 
@@ -414,13 +569,19 @@ public class ContentRestService {
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
         contentComment.setUserNo(webCertInfo.getUser().getUserNo());
         contentComment.setUpdateNo(webCertInfo.getUser().getUserNo());
-
         contentComment.setUpdateDt(toDay);
 
 
 
-        returnVal =  contentCommentRepository.updateContentComment(contentComment);
+        Integer  returnVal =  contentCommentRepository.updateContentComment(contentComment);
 
+        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+                                                                           .activityRefNo(contentComment.getContentCommentNo())
+                                                                           .activityCode(Codes.ACTIVITY_CODE.COMMENT)
+                                                                           .activityStat(Codes.getActivityCode(contentComment.getStat()))
+                                                                           .updateDt(toDay)
+                                                                           .updateNo(webCertInfo.getUser().getUserNo())
+                                                                           .build());
 
         return returnVal;
     }
@@ -432,18 +593,84 @@ public class ContentRestService {
     public Integer deleteContentComment (@CookieValue(value = "webCertInfo") String webCertInfoStr
         , @PathVariable("contentCommentNo") Integer contentCommentNo) {
 
+        Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+        Integer updateCount = contentCommentRepository.updateContentCommentStat(ContentComment.builder()
+                                                                                          .stat(Codes.EV_STAT.S4)
+                                                                                          .userNo(webCertInfo.getUser().getUserNo())
+                                                                                          .contentCommentNo(contentCommentNo)
+                                                                                          .updateDt(toDay)
+                                                                                          .updateNo(webCertInfo.getUser().getUserNo())
+                                                                                          .build());
+        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+                                                                           .activityRefNo(contentCommentNo)
+                                                                           .activityCode(Codes.ACTIVITY_CODE.COMMENT)
+                                                                           .activityStat(Codes.getActivityCode(Codes.EV_STAT.S4))
+                                                                           .updateDt(toDay)
+                                                                           .updateNo(webCertInfo.getUser().getUserNo())
+                                                                           .build());
 
-        return contentCommentRepository.updateContentCommentStat(ContentComment.builder()
-                                                                               .stat(Codes.EV_STAT.S4)
-                                                                               .userNo(webCertInfo.getUser().getUserNo())
-                                                                               .contentCommentNo(contentCommentNo)
-                                                                               .updateDt(new Date())
-                                                                               .updateNo(webCertInfo.getUser().getUserNo())
-                                                                               .build());
+        return updateCount;
     }
 
 
+    @GetMapping("/findContentActivityList/{activityCode}")
+    @ResponseBody
+    @ApiOperation(value="",  notes = "사용자 활동내역에 대한 조회 API")
+    @ApiImplicitParams({
+                           @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query", value = "Results page you want to retrieve (0..N)"),
+                           @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query", value = "Number of records per page."),
+                           @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query", value = "Sorting criteria in the format: property(,asc|desc). " +
+                               "Default sort order is ascending. " +
+                               "Multiple sort criteria are supported.")
+                       })
+    public Page<ContentActivityComb> findContentActivityList(@CookieValue(value = "webCertInfo" , defaultValue ="") String webCertInfoStr
+        , @ApiIgnore @PageableDefault(page=0, size=20) Pageable pageableParam
+        , @PathVariable("activityCode") Codes.ACTIVITY_CODE activityCode
+        ) throws ParseException {
 
+        PageRequest pageable = new PageRequest(pageableParam.getPageNumber(), pageableParam.getPageSize(), new Sort(Sort.Direction.DESC, "contentActivityNo")); //현재페이지, 조회할 페이지수, 정렬정보
+        Codes.ACTIVITY_STAT[] stats = new Codes.ACTIVITY_STAT[] {Codes.ACTIVITY_STAT.S2 , Codes.ACTIVITY_STAT.Y};
+        WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
+
+        Page<ContentActivity> activityList = null;
+
+        if (activityCode.equals(Codes.ACTIVITY_CODE.ALL))
+            activityList = contentActivityRepository.findByCreateNoAndActivityStatIn(webCertInfo.getUser().getUserNo(), stats, pageable);
+        else
+            activityList = contentActivityRepository.findByCreateNoAndActivityStatInAndActivityCode(webCertInfo.getUser().getUserNo(), stats,activityCode, pageable);
+
+
+        Page<ContentActivityComb> contentActivityCombs = activityList.map(d -> {
+                                                             ContentActivityComb cac = ContentActivityComb.builder()
+                                                                                                          .contentActivity(d)
+                                                                                                          .build();
+
+
+            log.debug("########### activityList ");
+            log.debug(cac.getContentActivity().getActivityCode().toString());
+            log.debug(String.valueOf(d.getActivityRefNo()));
+
+
+             switch (cac.getContentActivity().getActivityCode())
+             {
+                 case CONTENT:
+                     cac.setEventContent(eventContentRepository.findOne(d.getActivityRefNo()));
+                     break;
+                 case COMMENT:
+                     cac.setEventContent(eventContentRepository.findOne(contentCommentRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     break;
+                 case ALARM:
+                     cac.setEventContent(eventContentRepository.findOne(contentAlarmRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     break;
+                 case THUMBSUP:
+                     cac.setEventContent(eventContentRepository.findOne(contentThumbUpRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     break;
+             }
+             return cac;
+         }
+        );
+        return contentActivityCombs;
+    }
 
 }

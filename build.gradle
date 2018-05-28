@@ -39,6 +39,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+
+    compile 'org.jsoup:jsoup:1.11.3'
+
     compile("org.springframework.boot:spring-boot-starter-web")
     compile('org.apache.commons:commons-lang3:3.5')
     
@@ -51,7 +54,12 @@ dependencies {
     compile("io.springfox:springfox-swagger-ui:2.6.1")
     compile 'org.springframework.plugin:spring-plugin-core'
     compile 'com.googlecode.lambdaj:lambdaj:2.3.3'
-    
+    compile group: 'com.google.guava', name: 'guava', version: '22.0'
+
+    // 화면캡쳐
+    compile('org.seleniumhq.selenium:selenium-firefox-driver:2.48.2')
+    compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.4'
+
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
     // webPush 관련 추가 module start
