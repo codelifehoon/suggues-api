@@ -1,5 +1,8 @@
 package somun.common.util;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,6 +10,11 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import lombok.extern.slf4j.Slf4j;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Slf4j
 public class DateUtilsTest {
 
 
@@ -36,4 +44,40 @@ public class DateUtilsTest {
 
 
     }
+
+    @Test
+    public void messageDigest() throws NoSuchAlgorithmException {
+
+        String  originalString = "{\"endpoint\":\"https://fcm.googleapis" +
+            ".com/fcm/send/c1LeCqonfng:APA91bE25zo6Isg-StYKxxBadNEqxNFkcxYto8k17J_s8zL3USJjHrMFHu50XFrR_gKfi" +
+            "-PIw5HTo5rd3AnOMuZpYNiKDryTpyREwWFkdWQJ_pbDmRHBAL-WIERsLI4LKXDuiRdtWCJO\",\"expirationTime\":null," +
+            "\"keys\":{\"p256dh\":\"BEkVq-tUCzlU-9QjzyBWYkwiiBXHlLT9gni7a2kOAdger83HbX3tpNq-jC3aP5jeO0W1-nv0icmILUHAhPKAvf8\"," +
+            "\"auth\":\"F9wA_qHmv0YpODLODOzp7g\"}}";
+
+        String  originalString2 = "{\"endpoint\":\"https://fcm.googleapis" +
+            ".com/fcm/send/c1LeCqonfng:APA91bE25zo6Isg-StYKxxBadNEqxNFkcxYto8k17J_s8zL3USJjHrMFHu50XFrR_gKfi" +
+            "-PIw5HTo5rd3AnOMuZpYNiKDryTpyREwWFkdWQJ_pbDmRHBAL-WIERsLI4LKXDuiRdtWCJO\",\"expirationTime\":null," +
+            "\"keys\":{\"p256dh\":\"BEkVq-tUCzlU-9QjzyBWYkwiiBXHlLT9gni7a2kOAdger83HbX3tpNq-jC3aP5jeO0W1-nv0icmILUHAhPKAvf8\"," +
+            "\"auth\":\"F9wA_qHmv0YpODLODOzp7g\"}}";
+
+
+        byte[] encodedhash1 = MessageDigest.getInstance("SHA-256").digest(originalString.getBytes(StandardCharsets.UTF_8));
+        byte[] encodedhash2 = MessageDigest.getInstance("SHA-256").digest(originalString2.getBytes(StandardCharsets.UTF_8));
+
+
+
+        assertThat(bytesToHex(encodedhash1)).isEqualTo(bytesToHex(encodedhash2));
+
+    }
+
+    private static String bytesToHex(byte[] hash) {
+        StringBuffer hexString = new StringBuffer();
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if(hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
 }

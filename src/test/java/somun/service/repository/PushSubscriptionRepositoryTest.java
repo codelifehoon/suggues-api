@@ -10,32 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @Transactional
-public class ContentThumbUpTest {
+public class PushSubscriptionRepositoryTest {
 
     @Autowired
-    ContentThumbUpRepository contentThumbUpRepository;
+    PushSubscriptionRepository pushSubscriptionRepository;
 
     @Test
-    public  void test(){
-
+    public void findAll() {
+        Iterable<PushSubscription> all = pushSubscriptionRepository.findAll();
+        assertThat(all).isNotNull();
     }
-//
-//    @Test
-//    public void updateContentThumbUp_notUpdate(){
-//        Integer stat = contentThumbUpRepository.updateContentThumbUp(1, 1, "Y");
-//        assertThat(stat).isEqualTo(0);
-//    }
-//
-//    @Test
-//    public void updateContentThumbUp_Update(){
-//        Integer stat = contentThumbUpRepository.updateContentAlarmStat(2, 30, "Y");
-//        assertThat(stat).isEqualTo(1);
-//
-//    }
-
 }
-

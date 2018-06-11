@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -40,18 +39,6 @@ public interface EventContentRepository extends CrudRepository<EventContent,Inte
         ,nativeQuery = true
     )
     Page<EventContent> findAllContent(@Param("eventDesc")String eventDesc,@Param("stat")String stat,@Param("eventDate")Date eventDate, Pageable pageable);
-
-
-    @Modifying
-    @Query("UPDATE  EventContent u SET " +
-               "u.stat = :#{#content.stat} " +
-               ",u.updateNo=:#{#content.updateNo}" +
-               ",u.updateDt=:#{#content.updateDt}" +
-               " WHERE u.eventContentNo = :#{#content.eventContentNo}" +
-               " and u.createNo = :#{#content.updateNo}"
-    )
-    Integer updateContentStat(@Param("content") EventContent content);
-
 
 
 

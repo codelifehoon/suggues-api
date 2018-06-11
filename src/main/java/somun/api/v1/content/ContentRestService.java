@@ -44,16 +44,22 @@ import somun.exception.APIServerException;
 import somun.service.auth.WebCertService;
 import somun.service.repository.AutoComplite;
 import somun.service.repository.ContentActivity;
+import somun.service.repository.ContentActivityModifyRepository;
 import somun.service.repository.ContentActivityRepository;
 import somun.service.repository.ContentAlarm;
+import somun.service.repository.ContentAlarmModifyRepository;
 import somun.service.repository.ContentAlarmRepository;
 import somun.service.repository.ContentComment;
+import somun.service.repository.ContentCommentModifyRepository;
 import somun.service.repository.ContentCommentRepository;
 import somun.service.repository.ContentThumbUp;
+import somun.service.repository.ContentThumbUpModifyRepository;
 import somun.service.repository.ContentThumbUpRepository;
 import somun.service.repository.EventContent;
+import somun.service.repository.EventContentModifyRepository;
 import somun.service.repository.EventContentRepository;
 import somun.service.repository.EventLocation;
+import somun.service.repository.EventLocationModifyRepository;
 import somun.service.repository.EventLocationRepository;
 import somun.service.repository.User;
 import somun.service.repository.UserRepository;
@@ -78,22 +84,39 @@ public class ContentRestService {
     EventContentRepository eventContentRepository;
 
     @Autowired
+    EventContentModifyRepository eventContentModifyRepository;
+
+    @Autowired
     EventLocationRepository eventLocationRepository;
+    @Autowired
+    EventLocationModifyRepository eventLocationModifyRepository;
+
 
     @Autowired
     ContentAlarmRepository contentAlarmRepository;
+    @Autowired
+    ContentAlarmModifyRepository contentAlarmModifyRepository;
 
     @Autowired
     ContentThumbUpRepository contentThumbUpRepository;
+    @Autowired
+    ContentThumbUpModifyRepository contentThumbUpModifyRepository;
+
 
     @Autowired
     ContentCommentRepository contentCommentRepository;
+    @Autowired
+    ContentCommentModifyRepository contentCommentModifyRepository;
 
     @Autowired
     UserRepository userRepository;
 
+
     @Autowired
     ContentActivityRepository contentActivityRepository;
+    @Autowired
+    ContentActivityModifyRepository contentActivityModifyRepository;
+
 
     @Autowired
     WebCertService webCertService;
@@ -253,7 +276,7 @@ public class ContentRestService {
         eventContent.setEventDescText(JsoupExtends.text(eventContent.getEventDesc()));
         eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
 
-        EventContent save = eventContentRepository.save(eventContent);
+        EventContent save = eventContentModifyRepository.save(eventContent);
 
 
         List<EventLocation> eventLocations = Optional.ofNullable(eventContent.getEventLocations())
@@ -268,7 +291,7 @@ public class ContentRestService {
 
         List<EventLocation> locations = new ArrayList<>();
 
-        eventLocationRepository.save(eventLocations).forEach(locations::add);
+        eventLocationModifyRepository.save(eventLocations).forEach(locations::add);
         save.setEventLocations(locations);
 
         ContentActivity ca = ContentActivity.builder()
@@ -278,7 +301,7 @@ public class ContentRestService {
                                             .createDt(toDay)
                                             .createNo(webCertInfo.getUser().getUserNo())
                                             .build();
-        contentActivityRepository.save(ca);
+        contentActivityModifyRepository.save(ca);
 
 
 
@@ -323,7 +346,7 @@ public class ContentRestService {
         eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
 
 
-        eventContentRepository.save(eventContent);
+        eventContentModifyRepository.save(eventContent);
 
         List<EventLocation> eventLocations = Optional.ofNullable(eventContent.getEventLocations())
                                                      .orElse(new ArrayList<>())
@@ -337,7 +360,7 @@ public class ContentRestService {
         List<EventLocation> locations = new ArrayList<>();
 
 
-        eventLocationRepository.updateContentLocationStat(EventLocation.builder()
+        eventLocationModifyRepository.updateContentLocationStat(EventLocation.builder()
                                                                        .eventContentNo(eventContent.getEventContentNo())
                                                                        .createNo(webCertInfo.getUser().getUserNo())
                                                                        .useYn("N")
@@ -345,7 +368,7 @@ public class ContentRestService {
                                                                        .updateDt(toDay)
                                                                        .build());
 
-        eventLocationRepository.save(eventLocations).forEach(locations::add);
+        eventLocationModifyRepository.save(eventLocations).forEach(locations::add);
         findContent.setEventLocations(locations);
 
 
@@ -364,14 +387,14 @@ public class ContentRestService {
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
 
-        eventContentRepository.updateContentStat(EventContent.builder()
+        eventContentModifyRepository.updateContentStat(EventContent.builder()
                                                         .eventContentNo(eventContentNo)
                                                         .updateDt(toDay)
                                                         .updateNo(webCertInfo.getUser().getUserNo())
                                                         .stat(stat)
                                                         .build());
 
-        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+        contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                       .activityRefNo(eventContentNo)
                                                       .activityCode(Codes.ACTIVITY_CODE.CONTENT)
                                                       .activityStat(Codes.getActivityCode(stat))
@@ -399,7 +422,7 @@ public class ContentRestService {
         contentAlarm.setCreateDt(toDay);
         contentAlarm.setCreateNo(webCertInfo.getUser().getUserNo());
 
-        return contentAlarmRepository.save(contentAlarm).getContentAlarmNo();
+        return contentAlarmModifyRepository.save(contentAlarm).getContentAlarmNo();
     }
 
     @PatchMapping(value = "/updateContentAlarm/{contentAlarmNo}/{useYn}")
@@ -415,14 +438,14 @@ public class ContentRestService {
 
 
 
-        Integer updateCount = contentAlarmRepository.updateContentAlarmStat( ContentAlarm.builder()
+        Integer updateCount = contentAlarmModifyRepository.updateContentAlarmStat( ContentAlarm.builder()
                                                                                          .contentAlarmNo(contentAlarmNo)
                                                                                          .updateDt(toDay)
                                                                                          .updateNo(webCertInfo.getUser().getUserNo())
                                                                                          .useYn(useYn)
                                                                                          .build());
 
-        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+        contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                                            .activityRefNo(contentAlarmNo)
                                                                            .activityCode(Codes.ACTIVITY_CODE.ALARM)
                                                                            .activityStat(Codes.getActivityCode(useYn))
@@ -450,7 +473,7 @@ public class ContentRestService {
         contentThumbUp.setCreateDt(toDay);
         contentThumbUp.setCreateNo(webCertInfo.getUser().getUserNo());
 
-        return contentThumbUpRepository.save(contentThumbUp).getContentThumbupNo();
+        return contentThumbUpModifyRepository.save(contentThumbUp).getContentThumbupNo();
 
     }
 
@@ -464,8 +487,8 @@ public class ContentRestService {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-        Integer updateCount = contentThumbUpRepository.updateContentThumbUpStat(contentThumbupNo, webCertInfo.getUser().getUserNo(), useYn);
-        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+        Integer updateCount = contentThumbUpModifyRepository.updateContentThumbUpStat(contentThumbupNo, webCertInfo.getUser().getUserNo(), useYn);
+        contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                                            .activityRefNo(contentThumbupNo)
                                                                            .activityCode(Codes.ACTIVITY_CODE.THUMBSUP)
                                                                            .activityStat(Codes.getActivityCode(useYn))
@@ -486,6 +509,8 @@ public class ContentRestService {
         // comment list get
         List<ContentComment> contentComments = contentCommentRepository.findByEventContentNoAndStatOrderByCreateDtDesc(eventContentNo,Codes.EV_STAT.S2);
         List<Integer> userNos = contentComments.stream().map(ContentComment::getUserNo).collect(Collectors.toList());
+
+//        userNos.parallelStream().map(d->{});
 
         // userNo list를 이용해서 사용자 정보 list로 가져와서 map으로 변환
         Map<Integer, User> userMap = userRepository.findByUserNoIn(userNos)
@@ -550,7 +575,7 @@ public class ContentRestService {
         contentComment.setStat(Codes.EV_STAT.S2);
         contentComment.setCreateDt(toDay);
 
-        return contentCommentRepository.save(contentComment).getContentCommentNo();
+        return contentCommentModifyRepository.save(contentComment).getContentCommentNo();
 
     }
 
@@ -573,9 +598,9 @@ public class ContentRestService {
 
 
 
-        Integer  returnVal =  contentCommentRepository.updateContentComment(contentComment);
+        Integer  returnVal =  contentCommentModifyRepository.updateContentComment(contentComment);
 
-        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+        contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                                            .activityRefNo(contentComment.getContentCommentNo())
                                                                            .activityCode(Codes.ACTIVITY_CODE.COMMENT)
                                                                            .activityStat(Codes.getActivityCode(contentComment.getStat()))
@@ -595,14 +620,14 @@ public class ContentRestService {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-        Integer updateCount = contentCommentRepository.updateContentCommentStat(ContentComment.builder()
+        Integer updateCount = contentCommentModifyRepository.updateContentCommentStat(ContentComment.builder()
                                                                                           .stat(Codes.EV_STAT.S4)
                                                                                           .userNo(webCertInfo.getUser().getUserNo())
                                                                                           .contentCommentNo(contentCommentNo)
                                                                                           .updateDt(toDay)
                                                                                           .updateNo(webCertInfo.getUser().getUserNo())
                                                                                           .build());
-        contentActivityRepository.updateContentActivityStat(ContentActivity.builder()
+        contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                                            .activityRefNo(contentCommentNo)
                                                                            .activityCode(Codes.ACTIVITY_CODE.COMMENT)
                                                                            .activityStat(Codes.getActivityCode(Codes.EV_STAT.S4))

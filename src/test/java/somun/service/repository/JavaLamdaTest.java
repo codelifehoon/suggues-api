@@ -275,7 +275,6 @@ public class JavaLamdaTest {
 
 //        http://localhost:8080/User/User/FindAll/pageAuto
 
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "20");
         List<String> strList = new ArrayList<>();
         for (int i=0;i<300;i++) strList.add("http://localhost:8080/User/User/FindAll/pageAuto?cnt=" + i);
 

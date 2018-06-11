@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import org.junit.Ignore;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
@@ -15,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HtmlCaptureSample {
-    @Test
+
+
+    @Ignore
     public void htmlCapture()
     {
             //드라이버 초기화

@@ -61,13 +61,13 @@ public class UserRepositoryTest {
 
     @Test
     public void findByUserNo(){
-        User userList = userRepository.findByUserNo(2);
+        User userList = userRepository.findByUserNo(30);
         new LogUtil().printObject(userList);
     }
 
     @Test
     public void queryUserNo(){
-        List<User> userList = userRepository.queryUserNo(2);
+        List<User> userList = userRepository.queryUserNo(30);
         new LogUtil().printObjectList(userList);
     }
 
@@ -95,7 +95,7 @@ public class UserRepositoryTest {
 
     @Test
     public void findOne(){
-        new LogUtil().printObject(userRepository.findByUserNo(89));
+        new LogUtil().printObject(userRepository.findByUserNo(30));
     }
 
 

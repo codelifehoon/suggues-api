@@ -24,6 +24,7 @@ import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
 import somun.service.repository.User;
+import somun.service.repository.UserModifyRepository;
 import somun.service.repository.UserRepository;
 
 
@@ -40,6 +41,9 @@ public class UserRestService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    UserModifyRepository userModifyRepository;
+
 
 
     // TODO User에 updateDt 추가 및 변경 해야 한다.
@@ -53,7 +57,7 @@ public class UserRestService {
         new LogUtil().printObject(user);
 //        User save = userRepository.save(user);
 
-        Integer cnt = userRepository.updateUserStat(user.getUserNo(), user.getUserStat());
+        Integer cnt = userModifyRepository.updateUserStat(user.getUserNo(), user.getUserStat());
 
         return cnt;
     }
@@ -78,7 +82,7 @@ public class UserRestService {
         }
 
         user.setUserHash(new String(user.getUserId()+user.getUserProvider()).hashCode() + String.valueOf(RandomUti.randomString(9)));
-        return userRepository.save(user);
+        return userModifyRepository.save(user);
     }
 
 

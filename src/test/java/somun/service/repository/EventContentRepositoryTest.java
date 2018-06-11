@@ -28,7 +28,8 @@ public class EventContentRepositoryTest {
 
     @Autowired
     EventContentRepository eventContentRepository;
-
+    @Autowired
+    private EventContentModifyRepository eventContentModifyRepository;
 
 
     @Test
@@ -80,7 +81,7 @@ public class EventContentRepositoryTest {
     @Test
     public void updateStat(){
 
-        eventContentRepository.updateContentStat(EventContent.builder()
+        eventContentModifyRepository.updateContentStat(EventContent.builder()
                                                             .eventContentNo(108)
                                                             .updateDt(new Date())
                                                             .updateNo(999)

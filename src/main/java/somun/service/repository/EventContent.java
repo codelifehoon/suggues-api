@@ -19,6 +19,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -124,6 +125,8 @@ public class EventContent implements Serializable {
 	private Date updateDt;
 
     public void setEventDescText(String eventDescText) {
+    	if (StringUtils.isEmpty(eventDescText)) return;
+
         int maxLength = eventDescText.length();
         if (maxLength > 7990) maxLength = 7990;
         this.eventDescText = eventDescText.substring(0,maxLength);
