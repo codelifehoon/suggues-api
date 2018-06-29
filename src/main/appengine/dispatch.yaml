@@ -1,0 +1,10 @@
+dispatch:
+
+
+  # Default service serves simple hostname request.
+  - url: "api.gokgok.net/*"
+    service: default
+
+# Default service serves simple hostname request.
+  - url: "service.gokgok.net/*"
+    service: nodeservice

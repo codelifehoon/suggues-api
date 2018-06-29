@@ -4,10 +4,41 @@ package somun.common.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class DateUtils {
+
+
+    public  static Date addDayDate(String format, int day)  {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        Calendar c = Calendar.getInstance();
+
+        c.setTime(new Date());
+        c.add(Calendar.DATE, day);
+        try {
+            return new SimpleDateFormat(format).parse(simpleDateFormat.format(c.getTime()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+
+    public  static String addDayString(String format, int day){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        Calendar c = Calendar.getInstance();
+
+        c.setTime(new Date());
+        c.add(Calendar.DATE, day);
+
+        return simpleDateFormat.format(c.getTime());
+    }
+
+
     //	문자열 (날짜)				=> SimpleDateFormat
     //	yyyy-MM-dd HH:mm:ss			=> yyyy-MM-dd HH:mm:ss
     //	yyyy-MM-dd HH:mm:ss.SSS			=> yyyy-MM-dd HH:mm:ss.SSS
@@ -38,6 +69,10 @@ public class DateUtils {
     public static Date parse(String strDate) throws ParseException {
         if (strDate == null || strDate.isEmpty()) {
             throw new ParseException("Empty string", 0);
+        }
+
+        if (strDate.length() == 8 ){
+            return new SimpleDateFormat("yyyyMMdd", Locale.KOREA).parse(strDate);
         }
 
         StringBuilder sdfSb = new StringBuilder("yyyy-MM-dd");

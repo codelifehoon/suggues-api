@@ -78,4 +78,22 @@ public class Codes {
     }
 
 
+    // 컨텐츠 제공 정보 상태
+    public  enum CONTPROV_STAT { S0("신규"), S1("업데이트"), S2("적용완료"), S4("삭제");
+        private String value;
+        CONTPROV_STAT(String i) { this.value = i; }
+    }
+
+    // 컨텐츠 제공 정보 상태
+    public  enum CONTPROV { visitkorea("-1001");
+        private String value;
+        CONTPROV(String i) { this.value = i; }
+        public Integer getProvNumber(){ return Integer.valueOf(this.value);}
+    }
+
+
+
+
+
+
 }

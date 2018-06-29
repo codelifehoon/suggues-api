@@ -15,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.service.repository.User;
-import somun.service.repository.UserRepository;
+import somun.service.repository.user.User;
+import somun.service.repository.user.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

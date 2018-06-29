@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
+import somun.service.repository.function.PushSubscription;
+import somun.service.repository.function.PushSubscriptionRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -5,10 +5,11 @@ import java.io.Serializable;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.ContentAlarm;
-import somun.service.repository.ContentThumbUp;
-import somun.service.repository.EventContent;
-import somun.service.repository.User;
+import somun.service.repository.content.ContentAlarm;
+import somun.service.repository.content.ContentThumbUp;
+import somun.service.repository.content.EventContent;
+import somun.service.repository.content.EventLocation;
+import somun.service.repository.user.User;
 
 /**
  * The persistent class for the user database table.
@@ -24,6 +25,7 @@ public class EventContentWithUser implements Serializable {
 	User user;
 	ContentThumbUp contentThumbUp;
 	ContentAlarm contentAlarm;
+	EventLocation eventLocation;
 	Integer commentCnt;
 	Boolean isEqualLoginUser;
 

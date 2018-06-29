@@ -1,20 +1,29 @@
 
+
 buildscript {
     repositories {
+        jcenter()
         mavenCentral()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
         classpath 'org.springframework:springloaded:1.2.5.RELEASE'  // for hot swapping setting
+        // google app engine deploy lib
+        classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
     }
 }
 
 apply plugin: 'java'
+//apply plugin: 'war'     // 안되면 war 설정 제거할것
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'com.google.cloud.tools.appengine'
 
-
+// gradle bootRun으로 실행시  jvm 전달
+bootRun {
+    jvmArgs = ["-Dspring.profiles.active=dev"]
+}
 // for hot swapping setting start
 idea {
     module {
@@ -22,29 +31,48 @@ idea {
         outputDir = file("$buildDir/classes/main/")
     }
 }
+
 // for hot swapping setting end
 
-
-
 jar {
-    baseName = 'jpa-sample-group1'
+    baseName = 'suggues-api'
     version =  '0.1.0'
 }
+
+/*
+war {
+    baseName = 'com.suggust.api'
+    version = '0.0.1-SNAPSHOT'
+}
+*/
+
 
 repositories {
     mavenCentral()
 }
 
+group   = "com.suggust.api"        // Generated output GroupId
+version = "1.0-SNAPSHOT"       // Version in generated output
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+appengine {
+    deploy {
+        version = "GCLOUD_CONFIG"
+        project = "GCLOUD_CONFIG"
+    }
+}
+
 dependencies {
+
+    compile 'com.google.appengine:appengine-api-1.0-sdk:+'  // Latest App Engine Api's
 
     compile 'org.jsoup:jsoup:1.11.3'
 
     compile("org.springframework.boot:spring-boot-starter-web")
     compile('org.apache.commons:commons-lang3:3.5')
-    
+
     // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     // Use MySQL Connector-J
@@ -60,7 +88,7 @@ dependencies {
     compile('org.seleniumhq.selenium:selenium-firefox-driver:2.48.2')
     compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.4'
 
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+
 
     // webPush 관련 추가 module start
     // For parsing JSON
@@ -71,12 +99,21 @@ dependencies {
     // For cryptographic operations
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.54'
 
-    // For making HTTP requests
-    testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
-
     // For making async HTTP requests
     compile group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.3'
 
+    compile 'com.google.api-client:google-api-client:1.23.0'
+    compile 'com.google.firebase:firebase-admin:5.9.0'
+// webPush 관련 추가 module end
+
+    //logging
+    compile 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+
+
+
+    // For making HTTP requests
+    testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 
     // For making HTTP requests
     testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
@@ -86,14 +123,7 @@ dependencies {
 
     // For turning InputStream to String
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
-
-    compile 'com.google.api-client:google-api-client:1.23.0'
-    compile 'com.google.firebase:firebase-admin:5.9.0'
-// webPush 관련 추가 module end
-
-    //logging
-    compile 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
-
+    testCompile group: 'com.google.appengine', name: 'appengine-testing', version: '1.9.64'
 
 }
 

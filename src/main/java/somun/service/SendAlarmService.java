@@ -33,16 +33,16 @@ import nl.martijndwars.webpush.PushService;
 import nl.martijndwars.webpush.Subscription;
 import nl.martijndwars.webpush.Utils;
 import somun.common.biz.Codes;
-import somun.service.repository.ContentAlarm;
-import somun.service.repository.ContentAlarmRepository;
-import somun.service.repository.EventContent;
-import somun.service.repository.EventContentRepository;
-import somun.service.repository.PushHistory;
-import somun.service.repository.PushHistoryRepository;
-import somun.service.repository.PushSubscription;
-import somun.service.repository.PushSubscriptionRepository;
-import somun.service.repository.User;
-import somun.service.repository.UserRepository;
+import somun.service.repository.content.ContentAlarm;
+import somun.service.repository.content.ContentAlarmRepository;
+import somun.service.repository.content.EventContent;
+import somun.service.repository.content.EventContentRepository;
+import somun.service.repository.function.PushHistory;
+import somun.service.repository.function.PushHistoryRepository;
+import somun.service.repository.function.PushSubscription;
+import somun.service.repository.function.PushSubscriptionRepository;
+import somun.service.repository.user.User;
+import somun.service.repository.user.UserRepository;
 import somun.service.repositoryComb.Payload;
 
 @Slf4j

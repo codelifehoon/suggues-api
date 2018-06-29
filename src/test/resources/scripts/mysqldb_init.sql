@@ -1,6 +1,5 @@
-CREATE DATABASE `sampleDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
-
+CREATE DATABASE `suggestDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
 create table address
 (
@@ -14,15 +13,18 @@ create table address
 )
 	engine=InnoDB
 ;
-create table address
+
+create table content_activity
 (
-	user_no int not null
+	content_activity_no int auto_increment
 		primary key,
-	addr1 varchar(45) null,
-	add2 varchar(45) null,
-	add_detail varchar(45) null,
-	constraint user_no_UNIQUE
-	unique (user_no)
+	activity_code varchar(10) null,
+	activity_ref_no int null,
+	activity_stat varchar(10) null,
+	create_dt datetime null,
+	create_no int null,
+	update_dt datetime null,
+	update_no int null
 )
 	engine=InnoDB
 ;
@@ -56,7 +58,7 @@ create table content_comment
 	update_no int null,
 	user_no int null
 )
-	engine=MyISAM
+	engine=InnoDB
 ;
 
 create index comment_desc
@@ -98,7 +100,7 @@ create table event_content
 	repeat_kind varchar(5) not null,
 	tags varchar(1000) null
 )
-	engine=MyISAM
+	engine=InnoDB
 ;
 
 create index event_desc_text
@@ -141,6 +143,36 @@ create index FKni1m5tv1j57o0iykyoi0dj7ex
 	on hobby (user_no)
 ;
 
+create table push_history
+(
+	push_history_no int auto_increment
+		primary key,
+	create_dt datetime null,
+	create_no int null,
+	event_content_no int null,
+	push_payload varchar(255) null,
+	push_subscription_no int null,
+	user_no int null
+)
+	engine=InnoDB
+;
+
+create table push_subscription
+(
+	push_subscription_no int auto_increment
+		primary key,
+	create_dt datetime null,
+	create_no int null,
+	endpoint longtext null,
+	endpoint_hash varchar(255) null,
+	update_dt datetime null,
+	update_no int null,
+	use_yn varchar(255) null,
+	user_no int null
+)
+	engine=InnoDB
+;
+
 create table user
 (
 	user_no int auto_increment
@@ -160,20 +192,6 @@ create table user
 	unique (user_no),
 	constraint user_user_hash_uindex
 	unique (user_hash)
-)
-	engine=InnoDB
-;
-
-create table content_activity
-(
-	content_activity_no int auto_increment
-		primary key,
-	activity_code varchar(2) null,
-	activity_ref_no int null,
-	activity_stat varchar(10) null,
-	create_dt date null,
-	create_no int null,
-	update_dt date null
 )
 	engine=InnoDB
 ;

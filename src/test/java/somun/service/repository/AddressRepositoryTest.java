@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 import somun.common.util.LogUtil;
-
+import somun.service.repository.user.AddressRepository;
 
 @Slf4j
 @RunWith(SpringRunner.class)

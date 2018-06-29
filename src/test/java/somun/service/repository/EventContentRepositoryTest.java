@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 import somun.common.biz.Codes;
+import somun.common.util.DateUtils;
+import somun.service.repository.content.EventContent;
+import somun.service.repository.content.EventContentModifyRepository;
+import somun.service.repository.content.EventContentRepository;
 import somun.service.repositoryComb.EventContentWithUser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +41,7 @@ public class EventContentRepositoryTest {
 
         PageRequest pageable = new PageRequest(0, 10, new Sort(Sort.Direction.DESC, "eventContentNo")); //현재페이지, 조회할 페이지수, 정렬정보
 
-        Page<EventContent> listPage = eventContentRepository.findByStat(Codes.EV_STAT.S2, pageable);
+        Page<EventContent> listPage = eventContentRepository.findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT.S2, pageable, DateUtils.addDayDate("yyyyMMdd", 0));
 
 
         Page<EventContentWithUser> eventContentWithUsers = listPage.map(d -> {

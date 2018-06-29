@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.Ignore;
 import org.springframework.test.annotation.Commit;
 
 import com.google.gson.Gson;
@@ -58,7 +58,7 @@ public class WebPushTest {
     }
     //public static void addSecurityProvider() { Security.addProvider(new BouncyCastleProvider()); }
 
-    @Test
+    @Ignore
     public void testPushChromeVapid_old() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
@@ -115,7 +115,7 @@ public class WebPushTest {
     }
 
 
-    @Test
+    @Ignore
     public  void pushSend_devCode() throws IOException {
 //        File path = new File(".");
 //        System.out.println(path.getAbsolutePath());
@@ -143,7 +143,7 @@ public class WebPushTest {
 
 
 
-    @Test
+    @Ignore
     @Commit
     public void webpushTestPush() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
@@ -151,7 +151,8 @@ public class WebPushTest {
         Gson gson = new Gson();
         String vapidPublicKey = m_vapidPublicKey;
         String vapidPrivateKey = m_vapidPrivateKey;
-
+//       file에서 json 읽기
+//        https://stackoverflow.com/questions/29965764/how-to-parse-json-file-with-gson
 
         // Deserialize subscription object
         Subscription subscription = gson.fromJson(

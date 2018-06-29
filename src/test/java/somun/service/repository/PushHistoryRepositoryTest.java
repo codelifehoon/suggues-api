@@ -15,6 +15,8 @@ import com.google.gson.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
+import somun.service.repository.function.PushHistory;
+import somun.service.repository.function.PushHistoryRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

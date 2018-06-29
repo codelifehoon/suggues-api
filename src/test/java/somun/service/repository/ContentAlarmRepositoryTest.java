@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
+import somun.service.repository.content.ContentAlarm;
+import somun.service.repository.content.ContentAlarmModifyRepository;
+import somun.service.repository.content.ContentAlarmRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,11 +36,11 @@ public class ContentAlarmRepositoryTest {
     @Test
     public void updateContentAlarmStat_notUpdate(){
         Integer stat = contentAlarmModifyRepository.updateContentAlarmStat(ContentAlarm.builder()
-                                                                                 .contentAlarmNo(1)
-                                                                                 .updateDt(new Date())
-                                                                                 .updateNo(1)
-                                                                                 .useYn("N")
-                                                                                 .build());
+                                                                                       .contentAlarmNo(1)
+                                                                                       .updateDt(new Date())
+                                                                                       .updateNo(1)
+                                                                                       .useYn("N")
+                                                                                       .build());
         assertThat(stat).isEqualTo(0);
 
     }

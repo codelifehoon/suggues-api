@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
-import somun.service.repository.User;
-import somun.service.repository.UserRepository;
+import somun.service.repository.user.User;
+import somun.service.repository.user.UserRepository;
 import somun.service.repositoryComb.WebCertInfo;
 
 @Service

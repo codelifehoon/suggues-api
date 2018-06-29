@@ -13,7 +13,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.service.repository.AutoComplite;
-import somun.service.repository.ContentAlarm;
-import somun.service.repository.ContentComment;
-import somun.service.repository.ContentThumbUp;
-import somun.service.repository.EventContent;
-import somun.service.repository.EventLocation;
+import somun.service.repository.content.AutoComplite;
+import somun.service.repository.content.ContentAlarm;
+import somun.service.repository.content.ContentComment;
+import somun.service.repository.content.ContentThumbUp;
+import somun.service.repository.content.EventContent;
+import somun.service.repository.content.EventLocation;
 import somun.service.repositoryComb.ContentCommentWithUser;
 import somun.service.repositoryComb.EventContentWithUser;
 
@@ -159,7 +158,6 @@ public class ContentRestServiceTest {
     }
 
     @Test
-    @Commit
     public void addContent () {
 
         List<EventLocation> eventLocations = new ArrayList<>();
@@ -199,7 +197,6 @@ public class ContentRestServiceTest {
     }
 
     @Test
-    @Commit
     public void updateContent () {
 
         List<EventLocation> eventLocations = new ArrayList<>();
@@ -233,7 +230,6 @@ public class ContentRestServiceTest {
 
 
     @Test
-    @Commit
     public void updateContentStat () {
 
         Integer content = testRestTemplate.exchange("/Content/V1/updateContentStat/108/" + Codes.EV_STAT.S4, HttpMethod.PATCH

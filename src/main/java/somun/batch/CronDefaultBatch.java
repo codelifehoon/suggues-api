@@ -1,22 +1,17 @@
 package somun.batch;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
+@Service
 public class CronDefaultBatch {
 
-    @Scheduled(fixedDelay = 1000)
+//    @Scheduled(fixedDelay = 1000)
     public void otherJob() {
 
 
          }
-
-
-
-
 
 }

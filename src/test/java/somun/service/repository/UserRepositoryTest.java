@@ -21,6 +21,10 @@ import somun.Application;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
+import somun.service.repository.user.Address;
+import somun.service.repository.user.AddressRepository;
+import somun.service.repository.user.User;
+import somun.service.repository.user.UserRepository;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration("classpath:application-context.xml")
@@ -137,10 +141,10 @@ public class UserRepositoryTest {
         // if (1==1) throw  new Exception("jjh_exption");
 
         Address address = Address.builder()
-                .userNo(user1.getUserNo())
-                .addr1(RandomUti.randomString(3))
-                .add2(RandomUti.randomString(6))
-                .build();
+                                 .userNo(user1.getUserNo())
+                                 .addr1(RandomUti.randomString(3))
+                                 .add2(RandomUti.randomString(6))
+                                 .build();
 
 
         address = addressRepository.save(address);

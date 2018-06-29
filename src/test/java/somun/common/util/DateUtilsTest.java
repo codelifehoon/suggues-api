@@ -18,6 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DateUtilsTest {
 
 
+
+    @Test
+    public  void parseStr() throws ParseException{
+
+        log.debug(DateUtils.parse("2018-01-01 00:00:00").toString());
+
+
+    }
     @Test
     public  void parse() throws ParseException {
 

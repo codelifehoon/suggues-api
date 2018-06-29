@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
+import somun.service.repository.content.ContentThumbUpRepository;
 
 @Slf4j
 @RunWith(SpringRunner.class)
