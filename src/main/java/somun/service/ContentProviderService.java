@@ -12,8 +12,8 @@ import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
-import somun.service.repository.provider.ContentProvider;
 import somun.service.repository.provider.ContentProviderRepository;
+import somun.service.repository.vo.provider.ContentProvider;
 import somun.service.repositoryClient.visitkoreaTour.VisitKoreaContetComb;
 
 @Slf4j

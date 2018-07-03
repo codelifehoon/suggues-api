@@ -1,8 +1,4 @@
 #-- 상용 config
-#server:
-#  port: 8080
-#  tomcat:
-#      max-threads: 200
 
 spring:
   datasource:
@@ -29,7 +25,7 @@ provider:
     numOfRows: 10000
 
 
-#-- dev config
+##-- dev config
 #server:
 #  port: 8080
 #  tomcat:
@@ -66,9 +62,8 @@ provider:
 #provider:
 #  visitkorer:
 #    serviceKey: ilxc907Y8gZ92tPsEuhPpIJWpTgCNedxQO5zeg6bdCPqzleiueMFF1xQVn5psxiwUvZTvlmqF/mEQ3O7gbtlew==
-#    numOfRows: 100
-#
-#
+#    numOfRows: 10
+
 
 
 

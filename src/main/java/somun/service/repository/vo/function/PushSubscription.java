@@ -1,4 +1,4 @@
-package somun.service.repository.content;
+package somun.service.repository.vo.function;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The persistent class for the user database table.
+ * The persistent class for the address database table.
  * 
  */
 @Data
@@ -32,25 +33,30 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Slf4j
 @Entity
-@Table(name="content_alarm")
-@NamedQuery(name="ContentAlarm.findAll", query="SELECT u FROM ContentAlarm u")
-public class ContentAlarm implements Serializable {
+@Table(name="push_subscription")
+@NamedQuery(name="PushSubscription.findAll", query="SELECT u FROM PushSubscription u")
+public class PushSubscription implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(name="content_alarm_no")
-	@ApiModelProperty(notes = "자동생성일련번호" , hidden = true)
-	private Integer contentAlarmNo;
-
-	@Column(name="event_content_no")
-	@ApiModelProperty(notes = "관련 컨텐츠 번호" , required = true)
-	private Integer eventContentNo;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name="pushSubscriptionNo")
+	@ApiModelProperty(notes = "일련번호" , hidden = true)
+	private int pushSubscriptionNo;
 
 	@Column(name="user_no")
 	@ApiModelProperty(notes = "사용자 번호", hidden = true , required = true)
 	private Integer userNo;
+
+
+	@ApiModelProperty(notes = "push endpoint", required = true)
+	@Lob
+	@Column(name="endpoint")
+	private String endPoint;
+
+	@ApiModelProperty(notes = "push endpoint Hash", hidden = true )
+	@Column(name="endpointHash")
+	private String endPointHash;
 
 	@Column(name="use_yn")
 	@ApiModelProperty(notes = "사용 여부", hidden = true, required = true)
@@ -79,4 +85,3 @@ public class ContentAlarm implements Serializable {
 
 
 }
-

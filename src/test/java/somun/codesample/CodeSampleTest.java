@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repositoryComb.WebCertInfo;
+import somun.service.repository.vo.WebCertInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

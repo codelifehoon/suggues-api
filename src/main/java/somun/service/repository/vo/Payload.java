@@ -1,4 +1,4 @@
-package somun.service.repositoryComb;
+package somun.service.repository.vo;
 
 import lombok.Builder;
 import lombok.Data;

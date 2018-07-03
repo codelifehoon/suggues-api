@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import somun.service.repository.vo.content.EventContent;
+
 public interface EventContentModifyRepository extends CrudRepository<EventContent,Integer> , PagingAndSortingRepository<EventContent,Integer> {
 
 

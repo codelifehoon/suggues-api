@@ -5,11 +5,9 @@ create table address
 (
 	user_no int not null
 		primary key,
-	addr1 varchar(45) null,
-	add2 varchar(45) null,
-	add_detail varchar(45) null,
-	constraint user_no_UNIQUE
-	unique (user_no)
+	add2 varchar(255) null,
+	add_detail varchar(255) null,
+	addr1 varchar(255) null
 )
 	engine=InnoDB
 ;
@@ -18,9 +16,9 @@ create table content_activity
 (
 	content_activity_no int auto_increment
 		primary key,
-	activity_code varchar(10) null,
+	activity_code varchar(255) null,
 	activity_ref_no int null,
-	activity_stat varchar(10) null,
+	activity_stat varchar(255) null,
 	create_dt datetime null,
 	create_no int null,
 	update_dt datetime null,
@@ -33,13 +31,13 @@ create table content_alarm
 (
 	content_alarm_no int auto_increment
 		primary key,
-	event_content_no int not null,
-	user_no int not null,
-	use_yn varchar(10) not null,
-	create_no int not null,
-	create_dt datetime not null,
+	create_dt datetime null,
+	create_no int null,
+	event_content_no int null,
+	update_dt datetime null,
 	update_no int null,
-	update_dt datetime null
+	use_yn varchar(255) null,
+	user_no int null
 )
 	engine=InnoDB
 ;
@@ -61,8 +59,25 @@ create table content_comment
 	engine=InnoDB
 ;
 
-create index comment_desc
-	on content_comment (comment_desc)
+create table content_provider
+(
+	seq int auto_increment
+		primary key,
+	contet_comb json null,
+	create_dt datetime null,
+	create_no int null,
+	provider varchar(255) null,
+	stat varchar(255) null,
+	update_dt datetime null,
+	update_no int null,
+	provider_key varchar(255) null,
+	provider_modifiedtime varchar(255) null
+)
+	engine=InnoDB
+;
+
+create index content_provider_index2
+	on content_provider (stat, provider)
 ;
 
 create table content_thumb_up
@@ -75,7 +90,7 @@ create table content_thumb_up
 	update_dt datetime null,
 	update_no int null,
 	use_yn varchar(255) null,
-	user_no varchar(255) null
+	user_no int null
 )
 	engine=InnoDB
 ;
@@ -84,41 +99,45 @@ create table event_content
 (
 	event_content_no int auto_increment
 		primary key,
-	user_hash varchar(100) not null,
-	title varchar(1000) not null,
-	event_desc text not null,
-	event_desc_text varchar(8000) null,
-	event_desc_thumbnails text null,
-	event_start datetime null,
-	event_end datetime null,
-	path varchar(1000) null,
-	stat varchar(2) not null,
 	create_dt datetime not null,
-	create_no int not null,
+	create_no int null,
+	event_desc text null,
+	event_desc_text text null,
+	event_desc_thumbnails varchar(10000) null,
+	event_end datetime null,
+	event_start datetime null,
+	ref_content_key varchar(255) null,
+	path varchar(1000) null,
+	repeat_kind varchar(255) null,
+	stat varchar(255) null,
+	tags varchar(255) null,
+	title varchar(255) null,
 	update_dt datetime null,
 	update_no int null,
-	repeat_kind varchar(5) not null,
-	tags varchar(1000) null
+	user_hash varchar(255) null
 )
 	engine=InnoDB
 ;
 
-create index event_desc_text
-	on event_content (event_desc_text)
+create index event_content_index3
+	on event_content (ref_content_key)
+;
+
+create index event_content_index2
+	on event_content (stat, event_start, event_end)
 ;
 
 create table event_location
 (
 	event_location_no int auto_increment
 		primary key,
-	event_content_no int not null,
-	longitude decimal(11,8) not null,
-	latitude decimal(11,8) not null,
-	address_dtls varchar(8000) null,
-	address varchar(4000) null,
-	stat varchar(2) null,
+	address varchar(255) null,
+	address_dtls varchar(255) null,
 	create_dt datetime null,
 	create_no int null,
+	event_content_no int null,
+	latitude double null,
+	longitude double null,
 	update_dt datetime null,
 	update_no int null,
 	use_yn varchar(255) null
@@ -151,6 +170,8 @@ create table push_history
 	create_no int null,
 	event_content_no int null,
 	push_payload varchar(255) null,
+	push_result_content longtext null,
+	push_status_code varchar(255) null,
 	push_subscription_no int null,
 	user_no int null
 )
@@ -177,21 +198,17 @@ create table user
 (
 	user_no int auto_increment
 		primary key,
-	user_id varchar(45) not null,
-	user_nm varchar(45) not null,
-	user_desc varchar(2000) null,
-	create_no int not null,
-	create_dt datetime not null,
-	user_provider varchar(100) default 'none' not null,
-	user_photos varchar(1000) null,
-	user_stat varchar(5) default '00' not null,
-	user_hash varchar(100) not null,
-	update_no int null,
+	create_dt datetime null,
+	create_no int null,
 	update_dt datetime null,
-	constraint user_no_UNIQUE
-	unique (user_no),
-	constraint user_user_hash_uindex
-	unique (user_hash)
+	update_no int null,
+	user_desc varchar(255) null,
+	user_hash varchar(255) null,
+	user_id varchar(255) null,
+	user_nm varchar(255) null,
+	user_photos varchar(255) null,
+	user_provider varchar(255) null,
+	user_stat varchar(255) null
 )
 	engine=InnoDB
 ;

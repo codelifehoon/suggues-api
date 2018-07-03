@@ -3,7 +3,7 @@ package somun.service.repository.content;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import somun.service.repository.user.User;
+import somun.service.repository.vo.user.User;
 
 public interface AutoCompleteRepository extends CrudRepository<User,Integer> , PagingAndSortingRepository<User,Integer> {
 

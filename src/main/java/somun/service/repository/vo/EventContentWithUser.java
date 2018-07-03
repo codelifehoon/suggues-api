@@ -1,15 +1,15 @@
-package somun.service.repositoryComb;
+package somun.service.repository.vo;
 
 import java.io.Serializable;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.content.ContentAlarm;
-import somun.service.repository.content.ContentThumbUp;
-import somun.service.repository.content.EventContent;
 import somun.service.repository.content.EventLocation;
-import somun.service.repository.user.User;
+import somun.service.repository.vo.content.ContentAlarm;
+import somun.service.repository.vo.content.ContentThumbUp;
+import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.user.User;
 
 /**
  * The persistent class for the user database table.

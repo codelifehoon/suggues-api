@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import somun.service.repository.vo.content.ContentActivity;
+
 public interface ContentActivityModifyRepository extends CrudRepository<ContentActivity,Integer>,
                                                          PagingAndSortingRepository<ContentActivity,Integer> {
 

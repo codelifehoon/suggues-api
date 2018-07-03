@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
+import somun.service.repository.vo.content.ContentThumbUp;
+
 public interface ContentThumbUpRepository extends CrudRepository<ContentThumbUp,Integer>{
 
     ContentThumbUp findFirstByEventContentNoAndUseYnAndUserNo(Integer eventContentNo, String y, Integer userNo);

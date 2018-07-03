@@ -21,7 +21,7 @@ import com.google.common.collect.Ordering;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.common.util.RandomUti;
-import somun.service.repository.user.User;
+import somun.service.repository.vo.user.User;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration("classpath:application-context.xml")

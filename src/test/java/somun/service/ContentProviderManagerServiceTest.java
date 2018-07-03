@@ -10,8 +10,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 import somun.common.util.RandomUti;
-import somun.service.repository.content.EventContent;
-import somun.service.repository.provider.ContentProvider;
+import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.provider.ContentProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

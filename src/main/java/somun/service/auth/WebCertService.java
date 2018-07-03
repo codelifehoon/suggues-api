@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
-import somun.service.repository.user.User;
 import somun.service.repository.user.UserRepository;
-import somun.service.repositoryComb.WebCertInfo;
+import somun.service.repository.vo.WebCertInfo;
+import somun.service.repository.vo.user.User;
 
 @Service
 public class WebCertService {

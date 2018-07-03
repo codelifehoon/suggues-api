@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 import somun.common.biz.Codes;
+import somun.service.repository.vo.provider.ContentProvider;
 
 public interface ContentProviderRepository extends CrudRepository<ContentProvider,Integer>{
 

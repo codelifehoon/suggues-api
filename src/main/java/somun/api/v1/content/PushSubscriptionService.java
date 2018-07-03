@@ -22,10 +22,10 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.util.CommonUtil;
 import somun.service.auth.WebCertService;
-import somun.service.repository.function.PushSubscription;
 import somun.service.repository.function.PushSubscriptionModifyRepository;
 import somun.service.repository.function.PushSubscriptionRepository;
-import somun.service.repositoryComb.WebCertInfo;
+import somun.service.repository.vo.WebCertInfo;
+import somun.service.repository.vo.function.PushSubscription;
 
 @Slf4j
 @Controller

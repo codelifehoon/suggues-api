@@ -38,6 +38,17 @@ public class DateUtils {
         return simpleDateFormat.format(c.getTime());
     }
 
+    public  static String addDayString(Date input, String format, int day){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        Calendar c = Calendar.getInstance();
+
+        c.setTime(input);
+        c.add(Calendar.DATE, day);
+
+        return simpleDateFormat.format(c.getTime());
+    }
+
+
 
     //	문자열 (날짜)				=> SimpleDateFormat
     //	yyyy-MM-dd HH:mm:ss			=> yyyy-MM-dd HH:mm:ss

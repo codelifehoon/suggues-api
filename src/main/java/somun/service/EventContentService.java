@@ -12,13 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import somun.common.biz.Codes;
 import somun.common.util.JsoupExtends;
 import somun.exception.APIServerException;
-import somun.service.repository.content.ContentActivity;
 import somun.service.repository.content.ContentActivityModifyRepository;
-import somun.service.repository.content.EventContent;
 import somun.service.repository.content.EventContentModifyRepository;
 import somun.service.repository.content.EventContentRepository;
 import somun.service.repository.content.EventLocation;
 import somun.service.repository.content.EventLocationModifyRepository;
+import somun.service.repository.vo.content.ContentActivity;
+import somun.service.repository.vo.content.EventContent;
 
 @Service
 @Transactional

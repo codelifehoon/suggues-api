@@ -40,30 +40,32 @@ import somun.common.biz.Codes;
 import somun.common.util.DateUtils;
 import somun.service.EventContentService;
 import somun.service.auth.WebCertService;
-import somun.service.repository.content.AutoComplite;
-import somun.service.repository.content.ContentActivity;
 import somun.service.repository.content.ContentActivityModifyRepository;
 import somun.service.repository.content.ContentActivityRepository;
-import somun.service.repository.content.ContentAlarm;
 import somun.service.repository.content.ContentAlarmModifyRepository;
 import somun.service.repository.content.ContentAlarmRepository;
-import somun.service.repository.content.ContentComment;
 import somun.service.repository.content.ContentCommentModifyRepository;
 import somun.service.repository.content.ContentCommentRepository;
-import somun.service.repository.content.ContentThumbUp;
 import somun.service.repository.content.ContentThumbUpModifyRepository;
 import somun.service.repository.content.ContentThumbUpRepository;
-import somun.service.repository.content.EventContent;
 import somun.service.repository.content.EventContentModifyRepository;
 import somun.service.repository.content.EventContentRepository;
+import somun.service.repository.content.EventLocation;
 import somun.service.repository.content.EventLocationModifyRepository;
 import somun.service.repository.content.EventLocationRepository;
-import somun.service.repository.user.User;
 import somun.service.repository.user.UserRepository;
-import somun.service.repositoryComb.ContentActivityComb;
-import somun.service.repositoryComb.ContentCommentWithUser;
-import somun.service.repositoryComb.EventContentWithUser;
-import somun.service.repositoryComb.WebCertInfo;
+import somun.service.repository.vo.ContentActivityComb;
+import somun.service.repository.vo.ContentCommentWithUser;
+import somun.service.repository.vo.EventContentWithUser;
+import somun.service.repository.vo.WebCertInfo;
+import somun.service.repository.vo.content.AutoComplite;
+import somun.service.repository.vo.content.ContentActivity;
+import somun.service.repository.vo.content.ContentAlarm;
+import somun.service.repository.vo.content.ContentComment;
+import somun.service.repository.vo.content.ContentThumbUp;
+import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.function.SearchIndexComb;
+import somun.service.repository.vo.user.User;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Slf4j
@@ -138,7 +140,6 @@ public class ContentRestService {
         return autoComplites;
     }
 
-
     @GetMapping("/findEventList/{searchText}/{searchDate}/{longitude}/{latitude}")
     @ResponseBody
     @ApiOperation(value="",  notes = "컨텐츠 통합검색  API")
@@ -146,8 +147,7 @@ public class ContentRestService {
                            @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query", value = "Results page you want to retrieve (0..N)"),
                            @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query", value = "Number of records per page."),
                            @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query", value = "Sorting criteria in the format: property(,asc|desc). " +
-                                                                                                                                     "Default sort order is ascending. " +
-                                                                                                                                     "Multiple sort criteria are supported.")
+                                                                                                                                     "Default sort order is ascending. " + "Multiple sort criteria are supported.")
                        })
     public Page<EventContentWithUser> findEventList(@CookieValue(value = "webCertInfo" , defaultValue ="") String webCertInfoStr
         , @ApiIgnore @PageableDefault(page=0, size=20) Pageable pageable
@@ -662,7 +662,7 @@ public class ContentRestService {
                                "Default sort order is ascending. " +
                                "Multiple sort criteria are supported.")
                        })
-    public Page<EventContentWithUser> indexDocList(@ApiIgnore @PageableDefault(page=0, size=1000) Pageable pageable
+    public Page<SearchIndexComb> indexDocList(@ApiIgnore @PageableDefault(page=0, size=10) Pageable pageable
         , @PathVariable("indexStartDate")  String indexStartDate
         , @PathVariable("indexEndDate")  String indexEndDate
          ) throws ParseException {
@@ -682,17 +682,26 @@ public class ContentRestService {
 
         // 1.binding VOs to EventContentWithUser
         // 2.convert  VOs to page Object
-        Page<EventContentWithUser> eventContentWithUsers = indexDocs.map(d -> {
-            EventContentWithUser eventContentWithUser = EventContentWithUser.builder()
-                                                                            .eventContent(d)
-                                                                            .build();
+        Page<SearchIndexComb> searchIndexCombPage = indexDocs.map(d -> {
             //  do location-value each fetch if It can be a lot of value
-            eventContentWithUser.getEventContent()
-                                .setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(d.getEventContentNo(),"Y"));
-            return eventContentWithUser;
+            EventLocation eventLocation = Optional.ofNullable(eventLocationRepository.findFirstByUseYnAndEventContentNo("Y", d.getEventContentNo()))
+                                                    .orElse(EventLocation.builder().build());
+
+            SearchIndexComb searchIndexComb = SearchIndexComb.builder()
+                                                            .eventContentNo(d.getEventContentNo())
+                                                            .title(d.getTitle())
+                                                            .eventDescText(d.getEventDescText())
+                                                            .eventStart(d.getEventStart())
+                                                            .eventEnd(d.getEventEnd())
+                                                            .tags(d.getTags())
+                                                            .longitude(eventLocation.getLongitude())
+                                                            .latitude(eventLocation.getLatitude())
+                                                             .build();
+
+            return searchIndexComb;
         });
 
-        return eventContentWithUsers;
+        return searchIndexCombPage;
 
     }
 

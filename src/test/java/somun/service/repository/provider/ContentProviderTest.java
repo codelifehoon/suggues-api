@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 import somun.common.biz.Codes;
+import somun.service.repository.vo.provider.ContentProvider;
 import somun.service.repositoryClient.visitkoreaTour.VisitKoreaContetComb;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Item;
 
@@ -41,14 +42,14 @@ public class ContentProviderTest {
         String json = new Gson().toJson(build);
 
         ContentProvider contentProvider = ContentProvider.builder()
-                                               .provider(Codes.CONTPROV.visitkorea)
-                                               .contetComb(json)
-                                               .createDt(new Date())
-                                               .createNo(Codes.CONTPROV.visitkorea.getProvNumber())
-                                               .updateDt(new Date())
-                                               .updateNo(Codes.CONTPROV.visitkorea.getProvNumber())
-                                               .stat(Codes.CONTPROV_STAT.S0)
-                                               .build();
+                                                         .provider(Codes.CONTPROV.visitkorea)
+                                                         .contetComb(json)
+                                                         .createDt(new Date())
+                                                         .createNo(Codes.CONTPROV.visitkorea.getProvNumber())
+                                                         .updateDt(new Date())
+                                                         .updateNo(Codes.CONTPROV.visitkorea.getProvNumber())
+                                                         .stat(Codes.CONTPROV_STAT.S0)
+                                                         .build();
         ContentProvider save = contentProviderRepository.save(contentProvider);
         assertThat(save).isNotNull();
     }

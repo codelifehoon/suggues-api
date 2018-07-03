@@ -17,10 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import somun.Application;
 import somun.common.biz.Codes;
 import somun.common.util.DateUtils;
-import somun.service.repository.content.EventContent;
 import somun.service.repository.content.EventContentModifyRepository;
 import somun.service.repository.content.EventContentRepository;
-import somun.service.repositoryComb.EventContentWithUser;
+import somun.service.repository.vo.EventContentWithUser;
+import somun.service.repository.vo.content.EventContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

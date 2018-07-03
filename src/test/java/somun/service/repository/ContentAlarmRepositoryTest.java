@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.Application;
-import somun.service.repository.content.ContentAlarm;
 import somun.service.repository.content.ContentAlarmModifyRepository;
 import somun.service.repository.content.ContentAlarmRepository;
+import somun.service.repository.vo.content.ContentAlarm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

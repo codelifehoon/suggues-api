@@ -1,4 +1,4 @@
-package somun.service.repository.function;
+package somun.service.repository.vo.function;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.function.PushSubscription;
+import somun.service.repository.vo.function.PushSubscription;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

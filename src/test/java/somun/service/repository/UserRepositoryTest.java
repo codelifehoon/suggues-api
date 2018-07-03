@@ -21,10 +21,10 @@ import somun.Application;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.service.repository.user.Address;
 import somun.service.repository.user.AddressRepository;
-import somun.service.repository.user.User;
 import somun.service.repository.user.UserRepository;
+import somun.service.repository.vo.user.Address;
+import somun.service.repository.vo.user.User;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration("classpath:application-context.xml")

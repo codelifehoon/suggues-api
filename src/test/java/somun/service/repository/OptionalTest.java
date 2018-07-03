@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.common.util.RandomUti;
-import somun.service.repository.user.User;
+import somun.service.repository.vo.user.User;
 
 @Slf4j
 public class OptionalTest {

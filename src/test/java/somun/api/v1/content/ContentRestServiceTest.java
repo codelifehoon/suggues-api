@@ -20,14 +20,14 @@ import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.service.repository.content.AutoComplite;
-import somun.service.repository.content.ContentAlarm;
-import somun.service.repository.content.ContentComment;
-import somun.service.repository.content.ContentThumbUp;
-import somun.service.repository.content.EventContent;
 import somun.service.repository.content.EventLocation;
-import somun.service.repositoryComb.ContentCommentWithUser;
-import somun.service.repositoryComb.EventContentWithUser;
+import somun.service.repository.vo.ContentCommentWithUser;
+import somun.service.repository.vo.EventContentWithUser;
+import somun.service.repository.vo.content.AutoComplite;
+import somun.service.repository.vo.content.ContentAlarm;
+import somun.service.repository.vo.content.ContentComment;
+import somun.service.repository.vo.content.ContentThumbUp;
+import somun.service.repository.vo.content.EventContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

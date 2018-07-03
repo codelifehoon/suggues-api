@@ -11,6 +11,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import somun.common.biz.Codes;
+import somun.service.repository.vo.content.EventContent;
 
 public interface EventContentRepository extends CrudRepository<EventContent,Integer> , PagingAndSortingRepository<EventContent,Integer> {
 
@@ -46,4 +47,8 @@ public interface EventContentRepository extends CrudRepository<EventContent,Inte
 
     // provider에서 제공한 content를 찾는쿼리
     EventContent findByRefContentKeyAndStatIn(String providerKey, Codes.EV_STAT s2);
+
+
+
+
 }

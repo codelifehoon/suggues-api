@@ -20,9 +20,9 @@ import somun.common.util.DateUtils;
 import somun.config.properties.VisitkorerProperties;
 import somun.service.ContentProviderManagerService;
 import somun.service.ContentProviderService;
-import somun.service.repository.content.EventContent;
-import somun.service.repository.provider.ContentProvider;
 import somun.service.repository.provider.ContentProviderRepository;
+import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.provider.ContentProvider;
 import somun.service.repositoryClient.visitkoreaTour.VisitKoreaContetComb;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Content;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Item;
@@ -48,12 +48,12 @@ public class VisitKoreaBatch {
     ContentProviderManagerService contentProviderManagerService;
 
 //    @Scheduled(cron = "0 0 6 * * *")
-    public void regVisitKoreaContentToEventContent(){
+    public long regVisitKoreaContentToEventContent(){
         log.debug("#### regVisitKoreaContentToEventContent cron run!");
 
         Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1};
         List<ContentProvider> contentProviders = contentProviderRepository.findByStatIn(stats);
-        contentProviders.stream().map(d->{
+        return contentProviders.stream().map(d->{
             EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(d);
 
             d.setStat(Codes.CONTPROV_STAT.S2);
@@ -66,7 +66,7 @@ public class VisitKoreaBatch {
 
 
 //    @Scheduled(cron = "0 0 3 * * *")
-    public void getVisitKoreaContent(){
+    public int getVisitKoreaContent(){
 
         String body = getRestCallResult(new Content(),null);
 
@@ -95,9 +95,9 @@ public class VisitKoreaBatch {
         log.debug("################################");
         log.debug(new Gson().toJson(contetCombs));
 
-        int cnt =  contentProviderService.mergeIntoVisitKoreaContet(contetCombs);
+        return  contentProviderService.mergeIntoVisitKoreaContet(contetCombs);
 
-        log.info("getVisitKoreaContent row count:" + cnt);
+
     }
 
 

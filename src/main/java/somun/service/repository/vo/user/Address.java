@@ -1,4 +1,4 @@
-package somun.service.repository.user;
+package somun.service.repository.vo.user;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,7 +18,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.content.Hobby;
+import somun.service.repository.vo.content.Hobby;
 
 /**
  * The persistent class for the address database table.

@@ -35,4 +35,8 @@ security:
 provider:
   visitkorer:
     serviceKey: ilxc907Y8gZ92tPsEuhPpIJWpTgCNedxQO5zeg6bdCPqzleiueMFF1xQVn5psxiwUvZTvlmqF/mEQ3O7gbtlew==
-    numOfRows: 100
+    numOfRows: 5
+
+somun:
+  properties:
+    searchApiServer: http://localhost:9090
