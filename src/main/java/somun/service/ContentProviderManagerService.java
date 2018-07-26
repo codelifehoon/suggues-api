@@ -58,7 +58,7 @@ public class ContentProviderManagerService {
                                      .map(somun.service.repositoryClient.visitkoreaTour.introduceInfo.Header::getResultCode)
                                      .orElse("NULL"))
             ) {
-            log.error(" http error exists:" + d.toString());
+            log.error(" VisitKorea json error:" + d.toString());
             return null;
         }
 
@@ -98,7 +98,7 @@ public class ContentProviderManagerService {
                                                .updateNo(userNo)
                                                .updateDt(today)
                                              .build();
-        } catch (ParseException e) {e.printStackTrace();}
+        } catch (ParseException | NullPointerException e) { e.printStackTrace(); log.error(d.toString()); log.error("####################"); }
 
         if (eventContentResult.isPresent()){
             return eventContentService.updateEventContent(eventContentResult.get().getEventContentNo(), eventContent);

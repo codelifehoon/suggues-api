@@ -21,7 +21,8 @@ public interface EventContentRepository extends CrudRepository<EventContent,Inte
     Page<EventContent> findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT stat, Pageable pageable, Date eventEnd);
     Page<EventContent> findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT stat,Date date,Date date2, Pageable pageable);
 
-    List<EventContent> findByEventContentNoIn(List<Integer> eventContentNo,Codes.EV_STAT stat);
+    List<EventContent> findByEventContentNoInAndStat(List<Integer> eventContentNo,Codes.EV_STAT stat);
+
 
     @Query(value = "select * , match(a.event_desc_text) against( :eventDesc) as score "
                     + " from event_content  a where match(a.event_desc_text) against( :eventDesc) and a.stat =  :stat /* #pageable*/"

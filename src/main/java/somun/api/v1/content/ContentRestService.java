@@ -3,6 +3,7 @@ package somun.api.v1.content;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +11,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -28,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -38,6 +48,8 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.DateUtils;
+import somun.config.properties.SomunProperties;
+import somun.service.ContentSearchService;
 import somun.service.EventContentService;
 import somun.service.auth.WebCertService;
 import somun.service.repository.content.ContentActivityModifyRepository;
@@ -65,6 +77,7 @@ import somun.service.repository.vo.content.ContentComment;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
 import somun.service.repository.vo.function.SearchIndexComb;
+import somun.service.repository.vo.function.SearchIndexCombPage;
 import somun.service.repository.vo.user.User;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -123,6 +136,12 @@ public class ContentRestService {
     @Autowired
     EventContentService eventContentService;
 
+    @Autowired
+    SomunProperties  somunProperties;
+
+    @Autowired
+    ContentSearchService contentSearchService;
+
 
     @GetMapping("/findAutoCompliteList/{autoComplteKind}")
     @ResponseBody
@@ -140,7 +159,7 @@ public class ContentRestService {
         return autoComplites;
     }
 
-    @GetMapping("/findEventList/{searchText}/{searchDate}/{longitude}/{latitude}")
+    @GetMapping("/findEventList/{searchText}/{searchDate}/{latitude}/{longitude}/{locationDistance}")
     @ResponseBody
     @ApiOperation(value="",  notes = "컨텐츠 통합검색  API")
     @ApiImplicitParams({
@@ -153,27 +172,35 @@ public class ContentRestService {
         , @ApiIgnore @PageableDefault(page=0, size=20) Pageable pageable
         , @PathVariable("searchText")  String searchText
         , @PathVariable("searchDate")  String searchDateStr
-        , @PathVariable("longitude")  Long longitude
-        , @PathVariable("latitude")  Long latitude
+        , @PathVariable("latitude")  Double latitude
+        , @PathVariable("longitude")  Double longitude
+        , @PathVariable("locationDistance")  Integer locationDistance
          ) throws ParseException {
 
-//        http://localhost:8080/Content/V1/findEventList/initSearch/2018-05-18/0/0?page=0
-        Date searchDate = null;
+//        http://localhost:8080/Content/V1/findEventList/initSearch/%EB%AA%A8%EB%93%A0%EB%82%A0%EC%A7%9C/37.49618658088329/127.02783057672116/15000?page=0
+        Date searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);;
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
         Page<EventContent> eventContentPage ;
 
-        if (!"모든날짜".equals(searchDateStr)) searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
 
-        if ("initSearch".equals(searchText)) {
+        // 날짜만 가지고 검색일때는  DB로
+        if ("initSearch".equals(searchText) && latitude == 0) {
             PageRequest defaultPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), new Sort(Sort.Direction.DESC, "eventContentNo")); //현재페이지, 조회할 페이지수, 정렬정보
 
-            if (!"모든날짜".equals(searchDateStr))
-                eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2 , searchDate, searchDate, defaultPageable);
-            else
-                eventContentPage = eventContentRepository.findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT.S2, defaultPageable, DateUtils.addDayDate("yyyyMMdd", 0));
+            eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2 , searchDate, searchDate, defaultPageable);
+
         }
         else {
-            eventContentPage = eventContentRepository.findAllContent(searchText, Codes.EV_STAT.S2.toString(),searchDate, pageable);
+
+            SearchIndexComb searchQuery = SearchIndexComb.builder()
+                                                   .title(StringUtils.isEmpty(searchText) || "initSearch".equals(searchText)  ? null : searchText)
+                                                   .eventStart(searchDate)
+                                                   .latitude(latitude == 0 ? null : latitude)
+                                                   .longitude(longitude == 0 ? null : longitude)
+                                                   .locationDistance(locationDistance == 0 ? null : locationDistance)
+                                                   .build();
+
+            eventContentPage = contentSearchService.searchTotalSearchIndex(pageable, searchQuery);
         }
 
         List<EventContent> eventContents = eventContentPage.getContent();
@@ -228,6 +255,7 @@ public class ContentRestService {
         return eventContentWithUsers;
 
     }
+
 
 
     @GetMapping("/findContentForContentMain/{eventContentNo}")
@@ -300,7 +328,7 @@ public class ContentRestService {
 
     @PatchMapping(value = "/updateContentStat/{eventContentNo}/{stat}")
     @ResponseBody
-    @ApiOperation(value="",  notes = " 컨텐츠 수정")
+    @ApiOperation(value="",  notes = " 컨텐츠 상태 수정")
     @Transactional
     public Integer updateContentStat (@CookieValue("webCertInfo") String webCertInfoStr
         ,@PathVariable("eventContentNo") Integer eventContentNo
@@ -680,11 +708,16 @@ public class ContentRestService {
 
         List<Integer> eventContentNoList = eventContents.stream().map(EventContent::getEventContentNo).collect(Collectors.toList());
 
+        HashMap<Integer, EventLocation> eventLocationHashMap = eventLocationRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y").stream()
+                                                                   .collect(Collectors.toMap(EventLocation::getEventContentNo,
+                                                                                             Function.identity(),
+                                                                                             (o, n) -> o,
+                                                                                             HashMap::new));
         // 1.binding VOs to EventContentWithUser
         // 2.convert  VOs to page Object
         Page<SearchIndexComb> searchIndexCombPage = indexDocs.map(d -> {
             //  do location-value each fetch if It can be a lot of value
-            EventLocation eventLocation = Optional.ofNullable(eventLocationRepository.findFirstByUseYnAndEventContentNo("Y", d.getEventContentNo()))
+            EventLocation eventLocation = Optional.ofNullable(eventLocationHashMap.get(d.getEventContentNo()))
                                                     .orElse(EventLocation.builder().build());
 
             SearchIndexComb searchIndexComb = SearchIndexComb.builder()
@@ -693,9 +726,12 @@ public class ContentRestService {
                                                             .eventDescText(d.getEventDescText())
                                                             .eventStart(d.getEventStart())
                                                             .eventEnd(d.getEventEnd())
+                                                             .address(StringUtils.defaultIfEmpty(eventLocation.getAddress(),"")
+                                                                          + StringUtils.defaultIfEmpty(eventLocation.getAddressDtls(),""))
                                                             .tags(d.getTags())
                                                             .longitude(eventLocation.getLongitude())
                                                             .latitude(eventLocation.getLatitude())
+                                                             .createNo(eventLocation.getCreateNo())
                                                              .build();
 
             return searchIndexComb;

@@ -17,6 +17,8 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,10 +39,8 @@ import somun.common.biz.Codes;
 @Entity
 @Table(name="user")
 @NamedQuery(name="User.findAll", query="SELECT u FROM User u")
-public class User implements Serializable {
+public class User implements Serializable  {
 	private static final long serialVersionUID = 1L;
-
-
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -72,6 +72,8 @@ public class User implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Codes.USER_STAT userStat;
 
+
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name="user_hash")
     @ApiModelProperty(notes = "사용자 unique hash 값" , required = true)
 	private String userHash;
@@ -81,6 +83,7 @@ public class User implements Serializable {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name="create_dt")
 	private Date createDt;
+
 
 	@ApiModelProperty(notes = "생성자", hidden = true , required = true)
 	@Column(name="create_no")

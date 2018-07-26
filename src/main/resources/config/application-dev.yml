@@ -21,6 +21,7 @@ spring:
   thymeleaf:        # 템플릿 캐시 false for hot deploy
     cache: false
 
+
 logging:
   level:
     root: debug
@@ -34,9 +35,16 @@ security:
 
 provider:
   visitkorer:
-    serviceKey: ilxc907Y8gZ92tPsEuhPpIJWpTgCNedxQO5zeg6bdCPqzleiueMFF1xQVn5psxiwUvZTvlmqF/mEQ3O7gbtlew==
-    numOfRows: 5
+    serviceKey: HTwaQzxEWB4Ce/UQ6svGENGTxWdNNtucdMwr/5UA+aNuUY9lncsf2yW0fQhziCIwFBVc0uNLvZHM7MSqanEJ+A==
+    numOfRows: 10
 
 somun:
   properties:
-    searchApiServer: http://localhost:9090
+    searchApiServer: https://search-gokgok.appspot.com
+#    searchApiServer: http://localhost:9090
+
+
+
+
+## 개발 visitkorer.serviceKey 인증키
+## ilxc907Y8gZ92tPsEuhPpIJWpTgCNedxQO5zeg6bdCPqzleiueMFF1xQVn5psxiwUvZTvlmqF/mEQ3O7gbtlew==

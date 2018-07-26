@@ -52,7 +52,7 @@ public class ContentProviderService {
 
         // 기존에 존재하는지 확인
         ContentProvider result = null;
-        Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1, Codes.CONTPROV_STAT.S4};
+        Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1, Codes.CONTPROV_STAT.S2};
         ContentProvider contentResult = Optional.ofNullable(contentProviderRepository.findByProviderKeyAndStatIn(contentProvider.getProviderKey(), stats))
                                                 .orElse(ContentProvider.builder().build());
         // 기존 정보가 전재하고 수기정일자가 기존에 저장된 정보와 다르다면 update 진행

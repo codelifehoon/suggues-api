@@ -83,6 +83,7 @@ dependencies {
     compile 'org.springframework.plugin:spring-plugin-core'
     compile 'com.googlecode.lambdaj:lambdaj:2.3.3'
     compile group: 'com.google.guava', name: 'guava', version: '22.0'
+    compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.24.0.RELEASE'
 
     // 화면캡쳐
     compile('org.seleniumhq.selenium:selenium-firefox-driver:2.48.2')
@@ -111,12 +112,13 @@ dependencies {
 
 
 
+
+
     // For making HTTP requests
     testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
-    // For making HTTP requests
-    testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
+
 
     // For reading the demo vapid keypair from a pem file
     testCompile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.55'

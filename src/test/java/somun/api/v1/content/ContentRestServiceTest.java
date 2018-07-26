@@ -138,24 +138,44 @@ public class ContentRestServiceTest {
 
 
     @Test
-    public  void findEventList(){
+    public  void findEventList_all(){
 
         String reqUrl = "/Content/V1/findEventList"
-            +"/혹등고래인"
-            +"/2018-05-20"
-            +"/1"
-            +"/2";
+            +"/initSearch"
+            +"/모든날짜"
+            +"/0"
+            +"/0"
+            +"/0";
 
-        String content = this.testRestTemplate
-            .getForObject(reqUrl, String.class);
+        String content = this.testRestTemplate.getForObject(reqUrl, String.class);
 
-
-        log.debug(content);
+        log.debug("findEventList:" + content);
 
         assertThat(content).isNotNull();
 
 
     }
+
+    @Test
+    public  void findEventList_text(){
+
+        String reqUrl = "/Content/V1/findEventList"
+            +"/2017"
+            +"/모든날짜"
+            +"/0"
+            +"/0"
+            +"/0";
+
+        String content = this.testRestTemplate.getForObject(reqUrl, String.class);
+
+
+        log.debug("findEventList:" + content);
+
+        assertThat(content).isNotNull();
+
+
+    }
+
 
     @Test
     public void addContent () {
@@ -429,4 +449,17 @@ public class ContentRestServiceTest {
 
     }
 
+    @Test
+    public  void indexDocList (){
+        String json = testRestTemplate.exchange("/Content/V1/indexDocList/2018-01-01/2019-01-01?page=0&size=100000", HttpMethod.GET
+            , new HttpEntity(null,requestHeaders)
+            , String.class).getBody();
+
+
+        assertThat(json).isNotEmpty();
+
+        log.debug("###############################");
+        log.debug(json);
+
+    }
 }

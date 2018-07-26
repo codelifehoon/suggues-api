@@ -54,12 +54,19 @@ public class VisitKoreaBatch {
         Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1};
         List<ContentProvider> contentProviders = contentProviderRepository.findByStatIn(stats);
         return contentProviders.stream().map(d->{
-            EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(d);
+            try {
+                EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(d);
 
-            d.setStat(Codes.CONTPROV_STAT.S2);
-            d.setUpdateNo(Codes.CONTPROV.visitkorea.getProvNumber());
-            d.setUpdateDt(new Date());
-            contentProviderRepository.save(d);
+                if (eventContent == null){
+                    // not formal data is regattering process
+                    d.setProviderModifiedtime("-");
+                }
+
+                d.setStat(Codes.CONTPROV_STAT.S2);
+                d.setUpdateNo(Codes.CONTPROV.visitkorea.getProvNumber());
+                d.setUpdateDt(new Date());
+                contentProviderRepository.save(d);
+            } catch (Exception e){e.printStackTrace();  log.error(d.toString());}
             return 1;
         }).count();
     }

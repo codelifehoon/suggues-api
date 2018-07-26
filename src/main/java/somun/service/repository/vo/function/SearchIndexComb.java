@@ -6,6 +6,8 @@ import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.content.EventLocation;
 
 /**
  * The persistent class for the address database table.
@@ -15,13 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Slf4j
 public class SearchIndexComb implements Serializable {
+
 	private Integer eventContentNo;
 	private String title;
 	private String eventDescText;
 	private Date eventStart;
 	private Date eventEnd;
+	private String address;
 	private String tags;
 	private Double longitude;
 	private Double latitude;
-	private Long locationDistance;
+	private Integer locationDistance;
+	private Integer createNo;
+
 }

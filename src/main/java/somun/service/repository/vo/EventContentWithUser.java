@@ -5,10 +5,10 @@ import java.io.Serializable;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.content.EventLocation;
 import somun.service.repository.vo.content.ContentAlarm;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.content.EventLocation;
 import somun.service.repository.vo.user.User;
 
 /**
