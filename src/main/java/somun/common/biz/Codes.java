@@ -42,15 +42,11 @@ public class Codes {
     public  enum ACTIVITY_STAT {S0("등록대기"), S2("등록완료"), S4("삭제"), S5("등록정지") ,Y("예"),N("아니오");
         private String value;
         ACTIVITY_STAT(String i) { this.value = i; }
-
-
     }
 
-    public  enum ACTIVITY_CODE {ALL("전체") , CONTENT("작성글"), COMMENT("등록완료"), ALARM("푸시요청"), THUMBSUP("좋아요");
+    public  enum ACTIVITY_CODE {ALL("전체") , CONTENT("작성글"), COMMENT("댓글"), ALARM("푸시요청"), THUMBSUP("좋아요");
         private String value;
         ACTIVITY_CODE(String i) { this.value = i; }
-
-
     }
 
 
@@ -90,6 +86,19 @@ public class Codes {
         CONTPROV(String i) { this.value = i; }
         public Integer getProvNumber(){ return Integer.valueOf(this.value);}
     }
+
+
+
+    public  enum STORAGE_CODE {IMAGE("IMAGE");
+        private String value;
+        STORAGE_CODE(String i) { this.value = i; }
+    }
+
+    public  enum STORAGE_STAT {S0("등록대기"), S2("등록완료"), ML("ML처리완료") , S4("삭제");
+        private String value;
+        STORAGE_STAT(String i) { this.value = i; }
+    }
+
 
 
 

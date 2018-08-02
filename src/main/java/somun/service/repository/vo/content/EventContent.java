@@ -28,7 +28,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
-import somun.service.repository.content.EventLocation;
 
 /**
  * The persistent class for the address database table.
@@ -99,6 +98,11 @@ public class EventContent implements Serializable {
     @Transient
 	@ApiModelProperty(notes = "위치정보들" )
 	private List<EventLocation> eventLocations;
+
+    // 업로드 이미지들..
+	@Transient
+	@ApiModelProperty(notes = "위치정보들" )
+	private List<ContentStorage> contentStorages;
 
 	@ApiModelProperty(notes = "관심 태그")
 	@Column(name="tags")

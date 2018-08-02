@@ -9,6 +9,8 @@ spring:
     url: jdbc:log4jdbc:mysql://192.168.99.100:3306/suggestDB?useUnicode=true&characterEncoding=utf8
     username: root
     password: ail733
+    hikari:
+          maximum-pool-size: 3
     tomcat:
       test-while-idle: true
       validation-query: SELECT 1
@@ -40,8 +42,10 @@ provider:
 
 somun:
   properties:
-    searchApiServer: https://search-gokgok.appspot.com
-#    searchApiServer: http://localhost:9090
+#    searchApiServer: https://search-gokgok.appspot.com
+    searchApiServer: http://localhost:9090
+    jwtSecret: ZGV2X3poZW1ybmZu
+
 
 
 

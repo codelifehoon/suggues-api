@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import somun.service.repository.vo.content.EventLocation;
+
 public interface EventLocationModifyRepository extends CrudRepository<EventLocation,Integer>{
     @Modifying
     @Query("UPDATE  EventLocation u SET " +

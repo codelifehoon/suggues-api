@@ -29,7 +29,7 @@ import somun.common.biz.Codes;
 
 /**
  * The persistent class for the user database table.
- * 
+ *
  */
 @Data
 @NoArgsConstructor
@@ -44,6 +44,7 @@ public class User implements Serializable  {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Column(name="user_no")
 	@ApiModelProperty(notes = "자동생성일련번호" , hidden = true)
 	private Integer userNo;
@@ -74,9 +75,10 @@ public class User implements Serializable  {
 
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name="user_hash")
-    @ApiModelProperty(notes = "사용자 unique hash 값" , required = true)
+	@Column(name="user_hash")
+	@ApiModelProperty(notes = "사용자 unique hash 추가용" , hidden = true)
 	private String userHash;
+
 
 	@ApiModelProperty(notes = "생성일", hidden = true , required = true)
 	@Temporal(TemporalType.TIMESTAMP)

@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import somun.service.repository.vo.content.ContentAlarm;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
-import somun.service.repository.content.EventLocation;
 import somun.service.repository.vo.user.User;
 
 /**
@@ -25,7 +24,6 @@ public class EventContentWithUser implements Serializable {
 	User user;
 	ContentThumbUp contentThumbUp;
 	ContentAlarm contentAlarm;
-	EventLocation eventLocation;
 	Integer commentCnt;
 	Boolean isEqualLoginUser;
 

@@ -10,6 +10,12 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "somun.properties")
 public class SomunProperties {
 
-    String searchApiServer;
+    private String searchApiServer;
+    private String jwtSecret;
+
+    // web push 설정
+    private String vapidPublicKey;
+    private String vapidPrivateKey;
+    private String vapidAdmin;
 
 }

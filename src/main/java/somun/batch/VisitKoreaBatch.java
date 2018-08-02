@@ -47,33 +47,39 @@ public class VisitKoreaBatch {
     @Autowired
     ContentProviderManagerService contentProviderManagerService;
 
-//    @Scheduled(cron = "0 0 6 * * *")
+
     public long regVisitKoreaContentToEventContent(){
-        log.debug("#### regVisitKoreaContentToEventContent cron run!");
+        log.error("#### regVisitKoreaContentToEventContent cron start!");
 
         Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1};
         List<ContentProvider> contentProviders = contentProviderRepository.findByStatIn(stats);
-        return contentProviders.stream().map(d->{
+        long count = contentProviders.stream().map(d -> {
             try {
                 EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(d);
-
-                if (eventContent == null){
+                if (eventContent == null) {
                     // not formal data is regattering process
                     d.setProviderModifiedtime("-");
                 }
-
                 d.setStat(Codes.CONTPROV_STAT.S2);
                 d.setUpdateNo(Codes.CONTPROV.visitkorea.getProvNumber());
                 d.setUpdateDt(new Date());
                 contentProviderRepository.save(d);
-            } catch (Exception e){e.printStackTrace();  log.error(d.toString());}
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error(d.toString());
+            }
             return 1;
         }).count();
+
+        log.error("#### regVisitKoreaContentToEventContent cron end!");
+
+        return count;
     }
 
 
-//    @Scheduled(cron = "0 0 3 * * *")
+
     public int getVisitKoreaContent(){
+        log.error("#### getVisitKoreaContent cron start!");
 
         String body = getRestCallResult(new Content(),null);
 
@@ -99,11 +105,10 @@ public class VisitKoreaBatch {
                                                                                                 .build();
                                                                                          }
                                                         ).collect(Collectors.toList());
-        log.debug("################################");
-        log.debug(new Gson().toJson(contetCombs));
+        int count = contentProviderService.mergeIntoVisitKoreaContet(contetCombs);
+        log.error("#### getVisitKoreaContent cron end!");
 
-        return  contentProviderService.mergeIntoVisitKoreaContet(contetCombs);
-
+        return count;
 
     }
 

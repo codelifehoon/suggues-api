@@ -50,7 +50,6 @@ public class ContentActivity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Codes.ACTIVITY_CODE activityCode;
 
-
 	@ApiModelProperty(notes = "관련 컨텐츠 일련번호" , required = true)
 	@Column(name="activity_ref_no")
 	private Integer activityRefNo;
@@ -64,7 +63,7 @@ public class ContentActivity implements Serializable {
 	@Column(name="create_no")
 	private Integer createNo;
 
-	@ApiModelProperty(notes = "등록일")
+	@ApiModelProperty(notes = "생성일")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="create_dt")
 	private Date createDt;

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
+import somun.service.repository.vo.content.EventLocation;
+
 public interface EventLocationRepository extends CrudRepository<EventLocation,Integer>{
 
 

@@ -36,7 +36,7 @@ import somun.service.repository.vo.function.PushSubscription;
     @ApiResponse(code = 400, message = "Wrong Type Parameter"),
     @ApiResponse(code = 404, message = "Does not exists User"),
     @ApiResponse(code = 500, message = "Server Error")})
-public class PushSubscriptionService {
+public class PushSubscriptionController {
 
 
     private PushSubscriptionRepository pushSubscriptionRepository;
@@ -45,9 +45,9 @@ public class PushSubscriptionService {
 
     private PushSubscriptionModifyRepository pushSubscriptionModifyRepository;
 
-    public PushSubscriptionService(PushSubscriptionRepository pushSubscriptionRepository,
-                                   WebCertService webCertService,
-                                   PushSubscriptionModifyRepository pushSubscriptionModifyRepository) {
+    public PushSubscriptionController(PushSubscriptionRepository pushSubscriptionRepository,
+                                      WebCertService webCertService,
+                                      PushSubscriptionModifyRepository pushSubscriptionModifyRepository) {
         this.pushSubscriptionRepository = pushSubscriptionRepository;
         this.webCertService = webCertService;
         this.pushSubscriptionModifyRepository = pushSubscriptionModifyRepository;
@@ -94,8 +94,6 @@ public class PushSubscriptionService {
         return pushSubscriptionModifyRepository.save(pushSubscription)
                                          .getPushSubscriptionNo();
     }
-
-
 
 
 

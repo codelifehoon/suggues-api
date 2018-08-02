@@ -3,7 +3,6 @@ package somun.api.v1.content;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,21 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -37,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -47,7 +38,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
-import somun.common.util.DateUtils;
 import somun.config.properties.SomunProperties;
 import somun.service.ContentSearchService;
 import somun.service.EventContentService;
@@ -58,11 +48,11 @@ import somun.service.repository.content.ContentAlarmModifyRepository;
 import somun.service.repository.content.ContentAlarmRepository;
 import somun.service.repository.content.ContentCommentModifyRepository;
 import somun.service.repository.content.ContentCommentRepository;
+import somun.service.repository.content.ContentStorageRepository;
 import somun.service.repository.content.ContentThumbUpModifyRepository;
 import somun.service.repository.content.ContentThumbUpRepository;
 import somun.service.repository.content.EventContentModifyRepository;
 import somun.service.repository.content.EventContentRepository;
-import somun.service.repository.content.EventLocation;
 import somun.service.repository.content.EventLocationModifyRepository;
 import somun.service.repository.content.EventLocationRepository;
 import somun.service.repository.user.UserRepository;
@@ -76,8 +66,8 @@ import somun.service.repository.vo.content.ContentAlarm;
 import somun.service.repository.vo.content.ContentComment;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.content.EventLocation;
 import somun.service.repository.vo.function.SearchIndexComb;
-import somun.service.repository.vo.function.SearchIndexCombPage;
 import somun.service.repository.vo.user.User;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -90,7 +80,7 @@ import springfox.documentation.annotations.ApiIgnore;
                         @ApiResponse(code = 400, message = "Wrong Type Parameter"),
                         @ApiResponse(code = 404, message = "Does not exists User"),
                         @ApiResponse(code = 500, message = "Server Error")})
-public class ContentRestService {
+public class ContentRestController {
 
     @Autowired
     EventContentRepository eventContentRepository;
@@ -142,6 +132,11 @@ public class ContentRestService {
     @Autowired
     ContentSearchService contentSearchService;
 
+    @Autowired
+    ContentStorageRepository contentStorageRepository;
+
+
+
 
     @GetMapping("/findAutoCompliteList/{autoComplteKind}")
     @ResponseBody
@@ -177,18 +172,17 @@ public class ContentRestService {
         , @PathVariable("locationDistance")  Integer locationDistance
          ) throws ParseException {
 
-//        http://localhost:8080/Content/V1/findEventList/initSearch/%EB%AA%A8%EB%93%A0%EB%82%A0%EC%A7%9C/37.49618658088329/127.02783057672116/15000?page=0
+
         Date searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);;
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-        Page<EventContent> eventContentPage ;
+
 
 
         // 날짜만 가지고 검색일때는  DB로
         if ("initSearch".equals(searchText) && latitude == 0) {
             PageRequest defaultPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), new Sort(Sort.Direction.DESC, "eventContentNo")); //현재페이지, 조회할 페이지수, 정렬정보
 
-            eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2 , searchDate, searchDate, defaultPageable);
-
+            return contentSearchService.getIntergratSearchDefault(defaultPageable,webCertInfo,searchDate);
         }
         else {
 
@@ -199,63 +193,10 @@ public class ContentRestService {
                                                    .longitude(longitude == 0 ? null : longitude)
                                                    .locationDistance(locationDistance == 0 ? null : locationDistance)
                                                    .build();
-
-            eventContentPage = contentSearchService.searchTotalSearchIndex(pageable, searchQuery);
+            return  contentSearchService.getIntergratSearchDetail(pageable,webCertInfo,searchQuery);
         }
 
-        List<EventContent> eventContents = eventContentPage.getContent();
-
-        List<Integer> eventContentNoList = eventContents.stream().map(EventContent::getEventContentNo).collect(Collectors.toList());
-        List<Integer> userNos = eventContents.stream().map(EventContent::getCreateNo).collect(Collectors.toList());
-
-
-
-        HashMap<Integer, ContentThumbUp> contentThumbUpHashMap = contentThumbUpRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
-                                                                                         .stream()
-                                                                                         .collect(Collectors.toMap(ContentThumbUp::getEventContentNo,
-                                                                                                                   Function.identity(),
-                                                                                                                   (o, n) -> o,
-                                                                                                                   HashMap::new));
-        HashMap<Integer, ContentAlarm> contentAlarmHashMap = contentAlarmRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
-                                                                                   .stream()
-                                                                                   .collect(Collectors.toMap(ContentAlarm::getEventContentNo,
-                                                                                                             Function.identity(),
-                                                                                                             (o, n) -> o,
-                                                                                                             HashMap::new));
-        HashMap<Integer, User> userHashMap = userRepository.findByUserNoIn(userNos)
-                                                           .stream().collect(Collectors.toMap(User::getUserNo,
-                                                                                              Function.identity(),
-                                                                                              (o, n) -> o,
-                                                                                              HashMap::new));
-
-
-        // 1.binding VOs to EventContentWithUser
-        // 2.convert  VOs to page Object
-        Page<EventContentWithUser> eventContentWithUsers = eventContentPage.map(d -> {
-            EventContentWithUser eventContentWithUser = EventContentWithUser.builder()
-                                                                            .eventContent(d)
-                                                                            .contentThumbUp(Optional.ofNullable(contentThumbUpHashMap.get(d.getEventContentNo()))
-                                                                                                    .orElse(ContentThumbUp.builder()
-                                                                                                                          .build())
-                                                                            )
-                                                                            .contentAlarm(Optional.ofNullable(contentAlarmHashMap.get(d.getEventContentNo()))
-                                                                                                  .orElse(ContentAlarm.builder()
-                                                                                                                      .build())
-                                                                            )
-                                                                            .user(userHashMap.get(d.getCreateNo()))
-                                                                            .commentCnt(contentCommentRepository.countByEventContentNoAndStat(d.getEventContentNo(),Codes.EV_STAT.S2))
-                                                                            .isEqualLoginUser(webCertInfo.getUser().getUserNo() == d.getCreateNo())
-                                                                            .build();
-            //  do location-value each fetch if It can be a lot of value
-            eventContentWithUser.getEventContent()
-                                .setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(d.getEventContentNo(),"Y"));
-            return eventContentWithUser;
-        });
-
-        return eventContentWithUsers;
-
     }
-
 
 
     @GetMapping("/findContentForContentMain/{eventContentNo}")
@@ -278,6 +219,12 @@ public class ContentRestService {
 
 
         eventContent.setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContent.getEventContentNo(), "Y"));
+
+        eventContent.setContentStorages(contentStorageRepository.findByActivityRefNoAndActivityCodeAndStorageCodeAndStatNot(
+                                                        eventContent.getEventContentNo()
+                                                        ,Codes.ACTIVITY_CODE.CONTENT
+                                                        ,Codes.STORAGE_CODE.IMAGE
+                                                        ,Codes.STORAGE_STAT.S4));
 
         return EventContentWithUser.builder()
                                    .eventContent(eventContent)

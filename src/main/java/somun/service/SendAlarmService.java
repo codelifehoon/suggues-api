@@ -33,6 +33,7 @@ import nl.martijndwars.webpush.PushService;
 import nl.martijndwars.webpush.Subscription;
 import nl.martijndwars.webpush.Utils;
 import somun.common.biz.Codes;
+import somun.config.properties.SomunProperties;
 import somun.service.repository.content.ContentAlarmRepository;
 import somun.service.repository.content.EventContentRepository;
 import somun.service.repository.function.PushHistoryRepository;
@@ -64,17 +65,12 @@ public class SendAlarmService {
     @Autowired
     private EventContentRepository eventContentRepository;
 
-
-    // Base64 string server public/private key (gen: https://web-push-codelab.glitch.me/)
-    // pushServer publicKey
-    private  static final String vapidPublicKey = "BMRQd_C2NL8RDqrbxqHweX3g32j218yub56JjM8mE1A3I8jweO9MBBtfR65jHjhKrNOOeFhZx3bp2majGlN68qk";
-    // pushServer privateKey
-    private  static final String vapidPrivateKey = "knhJQfCDigLWb9k0GcWapwZPQRoHOylciRFNGZ8hR6g";
-
-    private  static final String vapidAdmin = "mailto:codelifehoon@gmail.com";
+    @Autowired
+    SomunProperties somunProperties;
 
 
 
+    // TODO   push를 위한 기존 project는 삭제 되어 재등록 필요함
     public void sendAlarmMassage() throws ParseException {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -196,9 +192,9 @@ public class SendAlarmService {
 
         PushService pushService = new PushService();
 //        pushService.setKeyPair(keyPair);
-        pushService.setPublicKey(Utils.loadPublicKey(this.vapidPublicKey));
-        pushService.setPrivateKey(Utils.loadPrivateKey(this.vapidPrivateKey));
-        pushService.setSubject(vapidAdmin);
+        pushService.setPublicKey(Utils.loadPublicKey(somunProperties.getVapidPublicKey()));
+        pushService.setPrivateKey(Utils.loadPrivateKey(somunProperties.getVapidPrivateKey()));
+        pushService.setSubject(somunProperties.getVapidAdmin());
 
         httpResponse = Optional.of(pushService.send(notification));
         System.out.println(httpResponse.get().getStatusLine().getStatusCode());

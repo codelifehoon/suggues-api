@@ -8,16 +8,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import somun.common.biz.Codes;
 import somun.service.repository.vo.user.User;
-import somun.service.repository.vo.user.UserReadOnly;
+import somun.service.repository.vo.user.UserForLogin;
 
 public interface UserRepository extends CrudRepository<User,Integer> , PagingAndSortingRepository<User,Integer> {
 
     // 특정 필드를 조회 대상에서 제외를 위해서 별도의 inetrface를 전달 가능함
-    public UserReadOnly findByUserNoAndUserHash(Integer userNo, String userHash);
+    public UserForLogin findByUserNoAndUserHash(Integer userNo, String userHash);
 
-
-    public Iterable<User> findByUserNm(User user);
-    public List<User> findByUserNm(String userNm);
     public User findByUserNo(Integer userNo);
 
     public List<User> findByUserNoIn(List<Integer> userNo);
@@ -29,11 +26,10 @@ public interface UserRepository extends CrudRepository<User,Integer> , PagingAnd
     public User findByUserHash(String userHash);
 
 
-//    public List<User> findTop10(Pageable pageable);
     public List<User> findTop10ByUserNoGreaterThan(int usrNo);
-//    public Page<User> findAll(Pageable pageable);
 
     public User findByUserIdAndUserProviderAndUserStat(String userId , String userProvider, Codes.USER_STAT userStat);
+
 
 
 

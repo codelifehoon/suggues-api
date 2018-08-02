@@ -1,6 +1,4 @@
-package somun.service;
-
-import java.text.ParseException;
+package somun.batch;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,17 +11,13 @@ import somun.Application;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes =  Application.class)
-public class SendAlarmServiceTest {
-
+@SpringBootTest(classes = Application.class)
+public class WorkflowBatchTest {
     @Autowired
-    SendAlarmService sendAlarmService;
-
+    WorkflowBatch workflowBatch;
 
     @Test
-    public void sendAlarmMassage() throws ParseException {
-
-        sendAlarmService.sendAlarmMassage();
-
+    public void updateVisitKoreaSearchDocBatch(){
+        workflowBatch.updateVisitKoreaSearchDoc();
     }
 }

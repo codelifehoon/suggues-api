@@ -25,6 +25,8 @@ import nl.martijndwars.webpush.Utils;
 public class WebPushTest {
 
 /*
+deleted firebase project
+
 <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -45,9 +47,9 @@ public class WebPushTest {
 
     // Base64 string server public/private key (gen: https://web-push-codelab.glitch.me/)
     // pushServer publicKey
-    String m_vapidPublicKey = "BMRQd_C2NL8RDqrbxqHweX3g32j218yub56JjM8mE1A3I8jweO9MBBtfR65jHjhKrNOOeFhZx3bp2majGlN68qk";
+    String m_vapidPublicKey = "";
     // pushServer privateKey
-    String m_vapidPrivateKey = "knhJQfCDigLWb9k0GcWapwZPQRoHOylciRFNGZ8hR6g";
+    String m_vapidPrivateKey = "";
 
 
     @Before

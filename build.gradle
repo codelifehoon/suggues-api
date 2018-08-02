@@ -67,6 +67,8 @@ appengine {
 dependencies {
 
     compile 'com.google.appengine:appengine-api-1.0-sdk:+'  // Latest App Engine Api's
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
 
     compile 'org.jsoup:jsoup:1.11.3'
 
@@ -90,6 +92,8 @@ dependencies {
     compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.4'
 
 
+    // google ML vision
+    compile 'com.google.cloud:google-cloud-vision:1.35.0'
 
     // webPush 관련 추가 module start
     // For parsing JSON

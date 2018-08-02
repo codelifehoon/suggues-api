@@ -24,5 +24,16 @@ public class CodeSampleTest {
 
         assertThat(w).isNotNull();
     }
+
+
+    @Test
+    public void hashTest(){
+        String hash = "userId1" +" userProvider1";
+
+        System.out.print("#############");
+        System.out.print(hash.hashCode());
+
+    }
+
 }
 

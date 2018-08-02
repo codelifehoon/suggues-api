@@ -1,6 +1,7 @@
 
 CREATE DATABASE `suggestDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
+
 create table address
 (
 	user_no int not null
@@ -78,6 +79,27 @@ create table content_provider
 
 create index content_provider_index2
 	on content_provider (stat, provider)
+;
+
+create table content_storage
+(
+	content_storage_no int auto_increment
+		primary key,
+	activity_code varchar(255) null,
+	activity_ref_no int null,
+	create_dt datetime null,
+	create_no int null,
+	storage_code varchar(255) null,
+	stat varchar(255) null,
+	storage_value varchar(10000) null,
+	update_dt datetime null,
+	update_no int null
+)
+	engine=InnoDB
+;
+
+create index content_storage_activity_code_activity_ref_no_index
+	on content_storage (activity_code, activity_ref_no)
 ;
 
 create table content_thumb_up
@@ -212,4 +234,5 @@ create table user
 )
 	engine=InnoDB
 ;
+
 

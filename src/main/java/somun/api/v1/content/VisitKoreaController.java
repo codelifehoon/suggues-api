@@ -23,7 +23,7 @@ import somun.batch.VisitKoreaBatch;
                         @ApiResponse(code = 400, message = "Wrong Type Parameter"),
                         @ApiResponse(code = 404, message = "Does not exists User"),
                         @ApiResponse(code = 500, message = "Server Error")})
-public class VisitKoreaService {
+public class VisitKoreaController {
 
 
     @Autowired

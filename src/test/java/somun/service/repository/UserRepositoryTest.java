@@ -25,7 +25,7 @@ import somun.service.repository.user.AddressRepository;
 import somun.service.repository.user.UserRepository;
 import somun.service.repository.vo.user.Address;
 import somun.service.repository.vo.user.User;
-import somun.service.repository.vo.user.UserReadOnly;
+import somun.service.repository.vo.user.UserForLogin;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration("classpath:application-context.xml")
@@ -43,6 +43,8 @@ public class UserRepositoryTest {
 
     @Autowired
     EntityManagerFactory emf;
+
+
 
   /*  @Test
     public void findByUserNoUpdate(){
@@ -205,7 +207,7 @@ public class UserRepositoryTest {
     public void findByUserNoAndUserHash() {
 
 
-        UserReadOnly byUserNoAndUserHash = userRepository.findByUserNoAndUserHash(4, "1074286626BOQZCKEPD");
+        UserForLogin byUserNoAndUserHash = userRepository.findByUserNoAndUserHash(4, "1074286626BOQZCKEPD");
 
         log.debug("#######################");
         new LogUtil().printObject(byUserNoAndUserHash);

@@ -6,8 +6,6 @@ import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import somun.service.repository.vo.content.EventContent;
-import somun.service.repository.content.EventLocation;
 
 /**
  * The persistent class for the address database table.

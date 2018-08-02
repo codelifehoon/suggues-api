@@ -20,14 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
-import somun.service.repository.content.EventLocation;
 import somun.service.repository.vo.ContentCommentWithUser;
 import somun.service.repository.vo.EventContentWithUser;
 import somun.service.repository.vo.content.AutoComplite;
 import somun.service.repository.vo.content.ContentAlarm;
 import somun.service.repository.vo.content.ContentComment;
+import somun.service.repository.vo.content.ContentStorage;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.content.EventLocation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-public class ContentRestServiceTest {
+public class ContentRestControllerTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -49,7 +50,7 @@ public class ContentRestServiceTest {
     @Before
     public void setUp() throws Exception {
         requestHeaders = new HttpHeaders();
-        requestHeaders.add("Cookie", "webCertInfo=j%3A%7B%22userHash%22%3A%2221474836247%22%7D");
+        requestHeaders.add("Cookie", "webCertInfo=j%3A%7B%22cb%22%3A%22http%3A%2F%2Flocalhost%3A3000%2FHome%22%2C%22userHash%22%3A%22eyJ0eXAiOiJKV1QiLCJyZWdEYXRlIjoxNTMyNjY4MjUzNTIzLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoiMjA2NDk4NDY2N0FZUkxXQ1RDUiJ9.stAIgeTxKvTaacTqz9fSbjDnkuLy0jcEx3eZxfhUKok%22%7D");
         htmlSample = "<p style=\"text-align:left;\"></p>\n" +
             "<p></p>\n" +
             "<p></p>\n" +
@@ -181,6 +182,16 @@ public class ContentRestServiceTest {
     public void addContent () {
 
         List<EventLocation> eventLocations = new ArrayList<>();
+        List<ContentStorage> contentStorages = new ArrayList<>();
+
+        contentStorages.add(ContentStorage.builder()
+                                          .storageValue("storageValueURL1")
+                                          .build()
+        );
+        contentStorages.add(ContentStorage.builder()
+                                          .storageValue("storageValueURL2")
+                                          .build()
+        );
 
         eventLocations.add(EventLocation.builder().latitude(1)
                                         .longitude(2)
@@ -208,6 +219,7 @@ public class ContentRestServiceTest {
                                                 .eventLocations(eventLocations)
                                                 .tags(RandomUti.randomString(3))
                                                 .stat(Codes.EV_STAT.S2)
+                                                .contentStorages(contentStorages)
                                                 .build();
         Integer content = testRestTemplate.exchange("/Content/V1/addContent", HttpMethod.POST
             , new HttpEntity(eventContent, requestHeaders)
@@ -220,6 +232,17 @@ public class ContentRestServiceTest {
     public void updateContent () {
 
         List<EventLocation> eventLocations = new ArrayList<>();
+        List<ContentStorage> contentStorages = new ArrayList<>();
+
+        contentStorages.add(ContentStorage.builder()
+                                          .storageValue("storageValueURL1")
+                                          .build()
+        );
+        contentStorages.add(ContentStorage.builder()
+                                          .storageValue("storageValueURL2")
+                                          .build()
+        );
+
 
         eventLocations.add(EventLocation.builder().latitude(1)
                                         .longitude(2)
@@ -237,10 +260,11 @@ public class ContentRestServiceTest {
                                                 .repeatKind(Codes.EV_REPKIND.M1)
                                                 .refPath(RandomUti.randomString(3))
                                                 .eventLocations(eventLocations)
+                                                .contentStorages(contentStorages)
                                                 .tags(RandomUti.randomString(3))
                                                 .stat(Codes.EV_STAT.S2)
                                                 .build();
-        Integer content = testRestTemplate.exchange("/Content/V1/updateContent/105", HttpMethod.POST
+        Integer content = testRestTemplate.exchange("/Content/V1/updateContent/1850", HttpMethod.POST
             , new HttpEntity(eventContent, requestHeaders)
             , Integer.class).getBody();
         new LogUtil().printObject(content);
@@ -411,13 +435,13 @@ public class ContentRestServiceTest {
 
     @Test
     public void findContentForContentMain(){
-        EventContentWithUser body = testRestTemplate.exchange("/Content/V1/findContentForContentMain/105"
+        EventContentWithUser body = testRestTemplate.exchange("/Content/V1/findContentForContentMain/1843"
             , HttpMethod.GET
-            , null
+            , new HttpEntity(null, requestHeaders)
             , EventContentWithUser.class)
                                                     .getBody();
         new LogUtil().printObject(body);
-        assertThat(body.getEventContent().getEventContentNo()).isEqualTo(105);
+        assertThat(body.getEventContent().getEventContentNo()).isEqualTo(1843);
 
     }
 

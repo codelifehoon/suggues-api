@@ -17,6 +17,7 @@ import somun.common.util.LogUtil;
 import somun.common.util.RandomUti;
 import somun.service.repository.user.UserRepository;
 import somun.service.repository.vo.user.User;
+import somun.service.repository.vo.user.UserForLogin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-public class UserRestServiceTest {
+public class UserRestControllerTest {
 
     @Autowired
     UserRepository userRepository;
@@ -50,21 +51,18 @@ public class UserRestServiceTest {
 
         Date date = new Date();
         User user = User.builder()
-                .userId("userId")
-                .userProvider("userProvider")
+                .userId("userId2")
+                .userProvider("userProvider2")
                 .userNm(RandomUti.randomString(3))
                 .userDesc(RandomUti.randomString(10) )
                 .userStat(Codes.USER_STAT.S1)
                 .createNo(RandomUti.randomNumber(3))
                 .createDt(new Date())
                 .build();
+        UserForLogin userForLogin = restTemplate.postForObject("/User/V1/AddUser", user, UserForLogin.class);
+        new LogUtil().printObject(userForLogin);
 
-        user = restTemplate.postForObject("/User/V1/AddUser", user, User.class);
-
-
-        new LogUtil().printObject(user);
-
-        assertThat(user).isNotNull();
+        assertThat(userForLogin).isNotNull();
 
     }
 
