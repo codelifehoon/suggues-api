@@ -1,6 +1,7 @@
 package somun.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,12 +42,15 @@ public class EventContentService {
     @Autowired
     ContentStorageModifyRepository contentStorageModifyRepository;
 
+    @Autowired
+    ContentSearchService contentSearchService;
+
 
     @Transactional
     public EventContent saveEventContent(EventContent eventContent) {
 
         eventContent.setEventDescText(JsoupExtends.text(eventContent.getEventDesc()));
-        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
+        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc(), 4));
 
         EventContent save = eventContentModifyRepository.save(eventContent);
         eventContent.setEventContentNo(save.getEventContentNo());
@@ -69,13 +73,15 @@ public class EventContentService {
                                             .createNo(eventContent.getUpdateNo())
                                             .build());
 
+        contentSearchService.mergeSearchIndex(Arrays.asList(save));
+
         return save;
     }
 
     @Transactional
     public EventContent updateEventContent(Integer eventContentNo, EventContent eventContent) {
 
-        EventContent findContent = eventContentRepository.findOne(eventContentNo);
+        EventContent findContent = eventContentRepository.findById(eventContentNo).get();
         if (!findContent.getCreateNo().equals(eventContent.getUpdateNo())) throw new APIServerException("it's not same user.");
 
         eventContent.setEventContentNo(findContent.getEventContentNo());
@@ -84,7 +90,7 @@ public class EventContentService {
         eventContent.setCreateDt(findContent.getCreateDt());
         eventContent.setCreateNo(findContent.getCreateNo());
         eventContent.setEventDescText(JsoupExtends.text(eventContent.getEventDesc()));
-        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc()));
+        eventContent.setEventDescThumbnails(JsoupExtends.imagesTagJsonList(eventContent.getEventDesc(), 4));
         eventContentModifyRepository.save(eventContent);
 
 
@@ -106,12 +112,9 @@ public class EventContentService {
 
         // add new image list
         List<ContentStorage> storages = addContentImage(eventContent);
-
         findContent.setContentStorages(storages);
 
-
-
-
+        contentSearchService.mergeSearchIndex(Arrays.asList(eventContent));
 
         return findContent;
     }
@@ -129,7 +132,7 @@ public class EventContentService {
                 return d;
             }).collect(Collectors.toList());
         List<EventLocation> locations = new ArrayList<>();
-        eventLocationModifyRepository.save(eventLocations).forEach(locations::add);
+        eventLocationModifyRepository.saveAll(eventLocations).forEach(locations::add);
         return locations;
     }
 
@@ -150,9 +153,10 @@ public class EventContentService {
                 return d;
             }).collect(Collectors.toList());
         List<ContentStorage> storages = new ArrayList<>();
-        contentStorageModifyRepository.save(contentStorages).forEach(storages::add);
+        contentStorageModifyRepository.saveAll(contentStorages).forEach(storages::add);
         return storages;
     }
+
 
 
 }

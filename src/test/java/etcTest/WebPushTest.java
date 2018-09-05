@@ -1,4 +1,4 @@
-package webpush.push;
+package etcTest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

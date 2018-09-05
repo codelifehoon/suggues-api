@@ -39,6 +39,8 @@ public class ContentProviderTest {
                                                               .addr1("addr1")
                                                               .build())
                                                          .build();
+        build.setContProv(Codes.CONTPROV.visitkorea);
+
         String json = new Gson().toJson(build);
 
         ContentProvider contentProvider = ContentProvider.builder()

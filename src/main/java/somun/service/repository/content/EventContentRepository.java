@@ -20,7 +20,7 @@ public interface EventContentRepository extends CrudRepository<EventContent,Inte
     List<EventContent> findByStat(Codes.EV_STAT stat);
     Page<EventContent> findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT stat, Pageable pageable, Date eventEnd);
     Page<EventContent> findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT stat,Date date,Date date2, Pageable pageable);
-
+    Page<EventContent> findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT stat,Date date, Pageable pageable);
     List<EventContent> findByEventContentNoInAndStat(List<Integer> eventContentNo,Codes.EV_STAT stat);
 
 
@@ -43,7 +43,9 @@ public interface EventContentRepository extends CrudRepository<EventContent,Inte
     Page<EventContent> findAllContent(@Param("eventDesc")String eventDesc,@Param("stat")String stat,@Param("eventDate")Date eventDate, Pageable pageable);
 
     // index 생성을 위한 쿼리
-    Page<EventContent> findAllByUpdateDtGreaterThanEqualAndUpdateDtLessThanEqualAndStat(Date  indexStartDate, Date  indexEndDate, Codes.EV_STAT stat, Pageable pageable);
+    Page<EventContent> findAllByUpdateDtGreaterThanEqualAndUpdateDtLessThanEqual(Date indexStartDate,
+                                                                                 Date indexEndDate,
+                                                                                 Pageable pageable);
 
 
     // provider에서 제공한 content를 찾는쿼리

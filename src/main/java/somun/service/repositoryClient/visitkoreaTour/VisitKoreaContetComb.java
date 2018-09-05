@@ -5,7 +5,6 @@ import com.google.gson.annotations.Expose;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import somun.common.biz.Codes;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Item;
 import somun.service.repositoryClient.visitkoreaTour.detailCommon.DetailCommon;
 import somun.service.repositoryClient.visitkoreaTour.extraImage.ExtraImage;
@@ -16,24 +15,23 @@ import somun.service.repositoryClient.visitkoreaTour.repeatInfo.Repeat;
 @Slf4j
 @Data
 @Builder
-public class VisitKoreaContetComb {
+public class VisitKoreaContetComb extends ProviderContetComb {
 
     @Expose
-    Item item;
+    private Item item;
     @Expose
-    ExtraImage extraImage;
+    private ExtraImage extraImage;
     @Expose
-    Introduce introduce;
+    private Introduce introduce;
     @Expose
-    Repeat repeat;
+    private Repeat repeat;
 
     @Expose
-    DetailCommon detailCommon;
+    private DetailCommon detailCommon;
 
+    public String getProviderKey(){
 
-    public String getProviderKey(Codes.CONTPROV provider){
-
-        return provider.name() + "_" + item.getContenttypeid() + "_" +  item.getContentid();
+        return contProv.name() + "_" + item.getContenttypeid() + "_" +  item.getContentid();
     }
 
 }

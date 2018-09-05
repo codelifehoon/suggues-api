@@ -17,12 +17,12 @@ import com.google.gson.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
 import somun.common.util.DateUtils;
-import somun.config.properties.VisitkorerProperties;
-import somun.service.ContentProviderManagerService;
-import somun.service.ContentProviderService;
+import somun.config.properties.SomunProperties;
 import somun.service.repository.provider.ContentProviderRepository;
 import somun.service.repository.vo.content.EventContent;
 import somun.service.repository.vo.provider.ContentProvider;
+import somun.service.repositoryClient.ContentProviderVisitKoreaService;
+import somun.service.repositoryClient.visitkoreaTour.ProviderContetComb;
 import somun.service.repositoryClient.visitkoreaTour.VisitKoreaContetComb;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Content;
 import somun.service.repositoryClient.visitkoreaTour.commonInfo.Item;
@@ -36,38 +36,39 @@ import somun.service.repositoryClient.visitkoreaTour.repeatInfo.Repeat;
 public class VisitKoreaBatch {
 
     @Autowired
-    VisitkorerProperties visitkorerProperties;
+    SomunProperties somunProperties;
 
     @Autowired
     ContentProviderRepository contentProviderRepository;
 
     @Autowired
-    ContentProviderService contentProviderService;
+    ContentProviderVisitKoreaService contentProviderVisitKoreaService;
 
-    @Autowired
-    ContentProviderManagerService contentProviderManagerService;
 
 
     public long regVisitKoreaContentToEventContent(){
         log.error("#### regVisitKoreaContentToEventContent cron start!");
 
         Codes.CONTPROV_STAT[] stats = new Codes.CONTPROV_STAT[] {Codes.CONTPROV_STAT.S0 , Codes.CONTPROV_STAT.S1};
-        List<ContentProvider> contentProviders = contentProviderRepository.findByStatIn(stats);
+        List<ContentProvider> contentProviders = contentProviderRepository.findByStatInAndProvider(stats, Codes.CONTPROV.visitkorea);
         long count = contentProviders.stream().map(d -> {
             try {
-                EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(d);
+                EventContent eventContent = contentProviderVisitKoreaService.mergeIntoProviderContetToEventContent(d);
                 if (eventContent == null) {
                     // not formal data is regattering process
                     d.setProviderModifiedtime("-");
                 }
                 d.setStat(Codes.CONTPROV_STAT.S2);
-                d.setUpdateNo(Codes.CONTPROV.visitkorea.getProvNumber());
-                d.setUpdateDt(new Date());
-                contentProviderRepository.save(d);
             } catch (Exception e) {
+                d.setStat(Codes.CONTPROV_STAT.S4);
                 e.printStackTrace();
                 log.error(d.toString());
             }
+
+            d.setUpdateNo(Codes.CONTPROV.visitkorea.getProvNumber());
+            d.setUpdateDt(new Date());
+            contentProviderRepository.save(d);
+
             return 1;
         }).count();
 
@@ -76,7 +77,7 @@ public class VisitKoreaBatch {
         return count;
     }
 
-
+    
 
     public int getVisitKoreaContent(){
         log.error("#### getVisitKoreaContent cron start!");
@@ -94,18 +95,28 @@ public class VisitKoreaBatch {
 
 
 
-        List<VisitKoreaContetComb> contetCombs = content.getBody().getItems().getItem().parallelStream()
-                                                        .map(d -> {
-                                                                     return VisitKoreaContetComb.builder()
-                                                                                                .item(d)
-                                                                                                .introduce(getIntrodece(new Introduce(),d))
-                                                                                                .extraImage(getExtraImage(new ExtraImage(),d))
-//                                                                                                .repeat(getRepeat(new Repeat(), d))
-                                                                                                .detailCommon(getDetailCommon(new DetailCommon(), d))
-                                                                                                .build();
-                                                                                         }
+
+        List<ProviderContetComb> contetCombs = content.getBody().getItems().getItem().parallelStream()
+                                                      .map(d -> {
+                                                                 VisitKoreaContetComb build = VisitKoreaContetComb.builder()
+                                                                                                                  .item(d)
+                                                                                                                  .introduce(getIntrodece
+                                                                                                                                 (new Introduce(),
+                                                                                                                                          d))
+                                                                                                                  .extraImage
+                                                                                                                      (getExtraImage(new ExtraImage(),
+                                                                                                                                            d))
+                //                                                                                                .repeat(getRepeat(new Repeat(), d))
+                                                                                                                  .detailCommon(getDetailCommon(
+                                                                                                                      new DetailCommon(),
+                                                                                                                      d))
+                                                                                                                  .build();
+                                                                 build.setContProv(Codes.CONTPROV.visitkorea);
+                                                                 return build;
+
+                                                             }
                                                         ).collect(Collectors.toList());
-        int count = contentProviderService.mergeIntoVisitKoreaContet(contetCombs);
+        int count = contentProviderVisitKoreaService.mergeIntoContentProvider(contetCombs);
         log.error("#### getVisitKoreaContent cron end!");
 
         return count;
@@ -180,7 +191,7 @@ public class VisitKoreaBatch {
 
     private String getVisitkoreaURL(Object obj,Item item)
     {
-        String tourServiceKey = visitkorerProperties.getServiceKey();
+        String tourServiceKey = somunProperties.getContentProvider().getVisitkorer().getServiceKey();
         String URL = "";
 
         if (obj instanceof Content){
@@ -199,7 +210,7 @@ public class VisitKoreaBatch {
                 "&arrange=A" +
                 "&eventStartDate=" + DateUtils.addDayString("yyyyMMdd ", 0) +
 //                "&eventEndDate=" + DateUtils.addDayString("yyyyMMdd ", 365) +
-                "&numOfRows=" + visitkorerProperties.getNumOfRows() +
+                "&numOfRows=" + somunProperties.getContentProvider().getVisitkorer().getNumOfRows() +
                 "&pageNo=1";
 
         }
@@ -282,8 +293,6 @@ public class VisitKoreaBatch {
             , null
             , String.class).getBody();
     }
-
-
 
 }
 

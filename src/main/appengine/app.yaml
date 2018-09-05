@@ -1,5 +1,4 @@
-
-service: default
+service: apiservice
 runtime: java
 env: flex
 
@@ -8,5 +7,7 @@ manual_scaling:
 
 resources:
   cpu: 1
-  memory_gb: 4
+  memory_gb: 1
 
+env_variables:
+  JAVA_USER_OPTS: '-Dspring.profiles.active=real'

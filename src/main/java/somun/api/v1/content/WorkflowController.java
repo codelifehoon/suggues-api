@@ -12,35 +12,28 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import somun.batch.VisitKoreaBatch;
+import somun.batch.WorkflowBatch;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = "*")
-@RequestMapping(path="Provider/V1/")
-@Api(value = "Provider/V1/", description = "Provider Service", tags = {"Provider"})
+@CrossOrigin(allowCredentials = "true" , origins = "*")
+@RequestMapping(path="Workflow/V1/")
+@Api(value = "Workflow/V1/", description = "Workflow Service", tags = {"Workflow"})
 @ApiResponses(value = {
                         @ApiResponse(code = 400, message = "Wrong Type Parameter"),
                         @ApiResponse(code = 404, message = "Does not exists User"),
                         @ApiResponse(code = 500, message = "Server Error")})
-public class VisitKoreaController {
+public class WorkflowController {
 
 
     @Autowired
-    VisitKoreaBatch visitKoreaBatch;
+    protected WorkflowBatch workflowBatch;
 
-    @GetMapping("/getVisitKoreaContent")
+    @GetMapping("/updateAllProvider")
     @ResponseBody
-    @ApiOperation(value="",notes = "VisitKorea 자료 추출")
-    public int getVisitKoreaContent() {
-        return visitKoreaBatch.getVisitKoreaContent();
-    }
-
-    @GetMapping("/regVisitKoreaContentToEventContent")
-    @ResponseBody
-    @ApiOperation(value="", notes = "VisitKorea 자료 반영")
-    public long regVisitKoreaContentToEventContent() {
-        return visitKoreaBatch.regVisitKoreaContentToEventContent();
+    @ApiOperation(value="",notes = "provider update")
+    public int updateAllProvider() {
+        return workflowBatch.updateAllProvider();
     }
 
 }

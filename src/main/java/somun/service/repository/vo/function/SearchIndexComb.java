@@ -27,5 +27,6 @@ public class SearchIndexComb implements Serializable {
 	private Double latitude;
 	private Integer locationDistance;
 	private Integer createNo;
+	private String stat;
 
 }

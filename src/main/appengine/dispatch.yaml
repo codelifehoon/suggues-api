@@ -3,8 +3,11 @@ dispatch:
 
   # Default service serves simple hostname request.
   - url: "api.gokgok.net/*"
-    service: default
+    service: apiservice
 
 # Default service serves simple hostname request.
   - url: "service.gokgok.net/*"
     service: nodeservice
+
+  - url: "search.gokgok.net/*"
+    service: default

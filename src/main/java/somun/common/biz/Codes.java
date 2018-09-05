@@ -81,7 +81,7 @@ public class Codes {
     }
 
     // 컨텐츠 제공 정보 상태
-    public  enum CONTPROV { visitkorea("-1001");
+    public  enum CONTPROV { visitkorea("-1001"), seouldata("-1002");
         private String value;
         CONTPROV(String i) { this.value = i; }
         public Integer getProvNumber(){ return Integer.valueOf(this.value);}

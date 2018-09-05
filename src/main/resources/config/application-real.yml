@@ -1,0 +1,38 @@
+#-- 상용 config
+spring:
+  datasource:
+    driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:mysql://104.198.127.210:3306/suggestDB?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: zhemrnfn1!
+    tomcat:
+      test-while-idle: true
+      validation-query: SELECT 1
+      min-evictable-idle-time-millis: 3600000
+      time-between-eviction-runs-millis: 60000
+  data:
+      web:
+        pageable:
+          max-page-size: 10000
+
+jpa:
+    generate-ddl: false
+
+logging:
+  level:
+    root: error
+
+somun:
+  properties:
+    searchApiServer: https://search.gokgok.net
+    jwtSecret: cmVhbF96aGVtcm5mbg==
+    vapidPublicKey: BMRQd_C2NL8RDqrbxqHweX3g32j218yub56JjM8mE1A3I8jweO9MBBtfR65jHjhKrNOOeFhZx3bp2majGlN68qk
+    vapidPrivateKey: knhJQfCDigLWb9k0GcWapwZPQRoHOylciRFNGZ8hR6g
+    vapidAdmin: mailto:codelifehoon@gmail.com
+    contentProvider:
+                seoulData:
+                  serviceKey: 63656e7461636f6431396565434375
+                  numOfRows: 1000
+                visitkorer:
+                  serviceKey: ilxc907Y8gZ92tPsEuhPpIJWpTgCNedxQO5zeg6bdCPqzleiueMFF1xQVn5psxiwUvZTvlmqF/mEQ3O7gbtlew==
+                  numOfRows: 10000

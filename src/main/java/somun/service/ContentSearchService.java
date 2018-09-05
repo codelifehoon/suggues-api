@@ -7,7 +7,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 import somun.common.biz.Codes;
+import somun.common.util.DateUtils;
 import somun.config.properties.SomunProperties;
 import somun.service.repository.content.ContentAlarmRepository;
 import somun.service.repository.content.ContentCommentRepository;
@@ -33,8 +36,9 @@ import somun.service.repository.vo.WebCertInfo;
 import somun.service.repository.vo.content.ContentAlarm;
 import somun.service.repository.vo.content.ContentThumbUp;
 import somun.service.repository.vo.content.EventContent;
+import somun.service.repository.vo.content.EventLocation;
+import somun.service.repository.vo.function.RestPageImpl;
 import somun.service.repository.vo.function.SearchIndexComb;
-import somun.service.repository.vo.function.SearchIndexCombPage;
 import somun.service.repository.vo.user.User;
 
 @Slf4j
@@ -43,28 +47,28 @@ public class ContentSearchService {
 
 
     @Autowired
-    EventContentRepository  eventContentRepository;
+    private EventContentRepository  eventContentRepository;
 
     @Autowired
-    SomunProperties somunProperties;
+    private SomunProperties somunProperties;
 
     @Autowired
-    ContentThumbUpRepository contentThumbUpRepository;
+    private ContentThumbUpRepository contentThumbUpRepository;
 
     @Autowired
-    ContentAlarmRepository contentAlarmRepository;
+    private ContentAlarmRepository contentAlarmRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    ContentCommentRepository contentCommentRepository;
+    private ContentCommentRepository contentCommentRepository;
 
     @Autowired
-    EventLocationRepository eventLocationRepository;
+    private EventLocationRepository eventLocationRepository;
 
     @Autowired
-    ContentStorageRepository contentStorageRepository;
+    private ContentStorageRepository contentStorageRepository;
 
 
 
@@ -77,8 +81,18 @@ public class ContentSearchService {
 
     public Page<EventContentWithUser>  getIntergratSearchDefault(PageRequest defaultPageable,WebCertInfo webCertInfo,Date searchDate) {
 
-        Page<EventContent> eventContentPage;
-        eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2 , searchDate, searchDate, defaultPageable);
+        Page<EventContent> eventContentPage = null;
+
+
+        if (searchDate == null) {
+            searchDate = DateUtils.addDayDate("yyyy-MM-dd",0);
+            eventContentPage = eventContentRepository.findByStatAndEventEndGreaterThanEqual(Codes.EV_STAT.S2, searchDate, defaultPageable);
+        }
+        else
+            eventContentPage = eventContentRepository.findByStatAndEventStartLessThanEqualAndEventEndGreaterThanEqual(Codes.EV_STAT.S2,searchDate,searchDate, defaultPageable);
+
+
+
         return getEventContentAndThumbAndAlarmAndUser(webCertInfo, eventContentPage);
 
     }
@@ -88,8 +102,12 @@ public class ContentSearchService {
     private Page<EventContentWithUser> getEventContentAndThumbAndAlarmAndUser(WebCertInfo webCertInfo, Page<EventContent> eventContentPage) {
 
         List<EventContent> eventContents = eventContentPage.getContent();
-        List<Integer> eventContentNoList = eventContents.stream().map(EventContent::getEventContentNo).collect(Collectors.toList());
-        List<Integer> userNos = eventContents.stream().map(EventContent::getCreateNo).collect(Collectors.toList());
+        List<Integer> eventContentNoList = eventContents.stream()
+                                                        .map(EventContent::getEventContentNo)
+                                                        .collect(Collectors.toList());
+        List<Integer> userNos = eventContents.stream()
+                                             .map(EventContent::getCreateNo)
+                                             .collect(Collectors.toList());
         HashMap<Integer, ContentThumbUp> contentThumbUpHashMap = contentThumbUpRepository.findByEventContentNoInAndUseYn(eventContentNoList, "Y")
                                                                                          .stream()
                                                                                          .collect(Collectors.toMap(ContentThumbUp::getEventContentNo,
@@ -140,15 +158,15 @@ public class ContentSearchService {
 
     private Page<EventContent> searchTotalSearchIndex(Pageable pageable,SearchIndexComb searchQuery) {
 
-
         String url = somunProperties.getSearchApiServer() + String.format("/Engine/V1/SE/searchTotalSearchIndex?page=%d&size=%d"
             ,pageable.getPageNumber()
             ,pageable.getPageSize());
 
+        ParameterizedTypeReference<RestPageImpl<SearchIndexComb>> responseType = new ParameterizedTypeReference<RestPageImpl<SearchIndexComb>>() { };
 
-        SearchIndexCombPage body = new RestTemplate().exchange(url, HttpMethod.POST
-                                                        , new HttpEntity(searchQuery, new HttpHeaders())
-                                                        , SearchIndexCombPage.class).getBody();
+        RestPageImpl<SearchIndexComb> body = new RestTemplate().exchange(url, HttpMethod.POST
+            , new HttpEntity(searchQuery, new HttpHeaders())
+            , responseType).getBody();
 
         Page<SearchIndexComb> combs = new PageImpl<>(body.getContent(),
                                                      new PageRequest(pageable.getPageNumber(), pageable.getPageSize()),
@@ -158,14 +176,59 @@ public class ContentSearchService {
         List<Integer> eventContentNoList = combs.getContent().stream().map(SearchIndexComb::getEventContentNo).collect(Collectors.toList());
 
         HashMap<Integer, EventContent> eventContentHashMap = eventContentRepository.findByEventContentNoInAndStat(eventContentNoList, Codes.EV_STAT.S2)
-                                                                                   .stream().collect(Collectors.toMap(EventContent::getEventContentNo
-                                                                                                ,Function.identity()
-                                                                                                ,(o, n) -> o
-                                                                                                ,HashMap::new));
-
-        return  combs.map(d -> eventContentHashMap.get(d.getEventContentNo()));
-
+                                                                                   .stream()
+                                                                                   .collect(Collectors.toMap(EventContent::getEventContentNo
+                                                                                       ,Function.identity()
+                                                                                       ,(o, n) -> o
+                                                                                       ,HashMap::new));
+        return combs.map(d -> Optional.ofNullable(eventContentHashMap.get(d.getEventContentNo()))
+                                      .orElse(EventContent.builder()        // 검색결과에 맞는 content가 존재하지 않을경우 임의 값으로 결과 맞춰줌.
+                                                          .eventContentNo(-1)
+                                                          .build()));
 
     }
+
+
+
+
+    public Integer  mergeSearchIndex(List<EventContent> eventContents){
+        // 1.binding VOs to EventContentWithUser
+        // 2.convert  VOs to page Object
+        List<SearchIndexComb> searchIndexCombs = eventContents.stream().map((EventContent d) -> {
+            //  do location-value each fetch if It can be a lot of value
+
+            EventLocation eventLocation = Optional.ofNullable(d.getEventLocations())
+                                                  .map(v->v.get(0))
+                                                  .orElse(EventLocation.builder().build());
+
+            SearchIndexComb searchIndexComb = SearchIndexComb.builder()
+                                                             .eventContentNo(d.getEventContentNo())
+                                                             .title(d.getTitle())
+                                                             .eventDescText(d.getEventDescText())
+                                                             .eventStart(d.getEventStart())
+                                                             .eventEnd(d.getEventEnd())
+                                                             .address(StringUtils.defaultIfEmpty(eventLocation.getAddress(), "")
+                                                                          + StringUtils.defaultIfEmpty(eventLocation.getAddressDtls(), ""))
+                                                             .tags(d.getTags())
+                                                             .longitude(eventLocation.getLongitude())
+                                                             .latitude(eventLocation.getLatitude())
+                                                             .createNo(eventLocation.getCreateNo())
+                                                             .stat(d.getStat().name())
+                                                             .build();
+            return searchIndexComb;
+        }).collect(Collectors.toList());
+
+
+        String url = somunProperties.getSearchApiServer() + "/Engine/V1/INDEX/mergeSearchIndex";
+
+        return new RestTemplate().exchange(url, HttpMethod.POST
+            , new HttpEntity(searchIndexCombs, new HttpHeaders())
+            , Integer.class).getBody();
+
+    }
+
+
+
+
 
 }

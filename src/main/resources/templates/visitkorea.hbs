@@ -1,0 +1,33 @@
+
+
+<h1>개요</h1>
+<p>{{{OVERVIEW}}}</p>
+
+{{#if ADDR1 and ADDR2}}
+    <h3>위치</h3>
+    <h5>{{ADDR1}} {{ADDR2}}</h5>
+{{/if}}
+
+{{#if TEL}}
+    <h3>연락처</h3>
+    <h5>{{TEL}}</h5>
+{{/if}}
+
+{{#if HOMEPAGE}}
+    <h3>사이트</h3>
+    <h5>{{{HOMEPAGE}}}</h5>
+{{/if}}
+
+{{#if FIRSTIMAGE1}}
+    <img src="{{{FIRSTIMAGE1}}}"/>
+{{/if}}
+
+{{#if FIRSTIMAGE2}}
+    <img src="{{{FIRSTIMAGE2}}}"/>
+{{/if}}
+
+{{#each EXTRAIMAGEITEMLIST}}
+<img src="{{{this}}}"/>
+{{/each}}
+
+정보제공: www.data.go.kr

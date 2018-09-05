@@ -18,4 +18,30 @@ public class SomunProperties {
     private String vapidPrivateKey;
     private String vapidAdmin;
 
+    private  ContentProvider contentProvider = new ContentProvider();
+
+    @Data
+    public   class ContentProvider {
+
+        private SeoulData seoulData = new SeoulData();
+        private Visitkorer visitkorer = new Visitkorer();
+
+        @Data
+        public  class SeoulData {
+            private String serviceKey;
+            private String numOfRows;
+        }
+
+        @Data
+        public class Visitkorer {
+            String serviceKey;
+            String numOfRows;
+        }
+
+    }
+
+
+
+
+
 }

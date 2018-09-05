@@ -1,23 +1,26 @@
-package somun.batch;
+package somun.api.v1.content;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.extern.slf4j.Slf4j;
-import somun.Application;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class WorkflowBatchTest {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
+public class EtcRestcallTest {
+
     @Autowired
-    WorkflowBatch workflowBatch;
+    private TestRestTemplate testRestTemplate;
+
 
     @Test
-    public void updateVisitKoreaSearchDocBatch(){
-        workflowBatch.updateAllProvider();
+    public  void etcCall(){
+
     }
 }

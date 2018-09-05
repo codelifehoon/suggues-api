@@ -29,7 +29,7 @@ import somun.service.repository.vo.function.PushSubscription;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = "*")
+@CrossOrigin(allowCredentials = "true" , origins = "*")
 @RequestMapping(path="Subscription/V1/")
 @Api(value = "Subscription/V1/", description = "Push Subscription Service", tags = {"Subscription"})
 @ApiResponses(value = {

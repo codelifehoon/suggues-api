@@ -1,5 +1,5 @@
 
-CREATE DATABASE `suggestDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
+# CREATE DATABASE `suggestDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
 
 create table address
@@ -90,10 +90,11 @@ create table content_storage
 	create_dt datetime null,
 	create_no int null,
 	storage_code varchar(255) null,
-	stat varchar(255) null,
 	storage_value varchar(10000) null,
+	full_path varchar(1000) null,
 	update_dt datetime null,
-	update_no int null
+	update_no int null,
+	stat varchar(255) null
 )
 	engine=InnoDB
 ;
@@ -123,8 +124,8 @@ create table event_content
 		primary key,
 	create_dt datetime not null,
 	create_no int null,
-	event_desc text null,
-	event_desc_text text null,
+	event_desc mediumtext null,
+	event_desc_text mediumtext null,
 	event_desc_thumbnails varchar(10000) null,
 	event_end datetime null,
 	event_start datetime null,
@@ -234,5 +235,4 @@ create table user
 )
 	engine=InnoDB
 ;
-
 

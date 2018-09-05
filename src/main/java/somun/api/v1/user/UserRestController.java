@@ -29,7 +29,7 @@ import somun.service.repository.vo.user.UserForLogin;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = "*")
+@CrossOrigin(allowCredentials = "true" , origins = "*")
 @RequestMapping(path="User/V1/")
 @Api(value = "User/V1/", description = "User Service", tags = {"User"})
 @ApiResponses(value = {

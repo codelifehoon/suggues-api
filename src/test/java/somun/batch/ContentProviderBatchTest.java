@@ -12,7 +12,10 @@ import somun.Application;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class VisitKoreaBatchTest {
+public class ContentProviderBatchTest {
+
+    @Autowired
+    SeoulDataBatch seoulDataBatch;
 
     @Autowired
     VisitKoreaBatch visitKoreaBatch;
@@ -27,9 +30,25 @@ public class VisitKoreaBatchTest {
 
     @Test
     public void getVisitKoreaContent(){
-
-        visitKoreaBatch.getVisitKoreaContent();;
+        visitKoreaBatch.getVisitKoreaContent();
     }
+
+    @Test
+    public void getSeoulDataContent_ListPublicReservationCulture(){
+        seoulDataBatch.getSeoulDataContent("ListPublicReservationCulture");
+    }
+    @Test
+    public void getSeoulDataContent_ListPublicReservationEducation(){
+        seoulDataBatch.getSeoulDataContent("ListPublicReservationEducation");
+    }
+
+
+    @Test
+    public void regSeoulDataContentToEventContent(){
+
+        seoulDataBatch.regSeoulDataContentToEventContent();
+    }
+
 
 
 

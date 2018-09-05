@@ -1,0 +1,24 @@
+<h1>{{SVCNM}}</h1>
+{{#if TELNO}}
+    <h3>전화번호:{{TELNO}}</h3>
+{{/if}}
+
+{{#if SVCURL}}
+    <h3>예약정보: <a href="{{SVCURL}}">{{SVCURL}}</a> </h3>
+{{/if}}
+
+{{#if NOTICE}}
+    <h3>공지사항</h3>
+    <h5>{{{NOTICE}}}</h5>
+{{/if}}
+
+{{#if DTLCONT}}
+    <h3>상세정보</h3>
+    <p>{{{DTLCONT}}}</p>
+{{/if}}
+
+{{#if IMAGES}}
+    <img src="{{{IMAGES}}}">
+{{/if}}
+
+정보제공: openapi.seoul.go.kr

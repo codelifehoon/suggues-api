@@ -1,13 +1,15 @@
-
-
 buildscript {
+    ext {
+        springBootVersion = '2.0.4.RELEASE'
+    }
+
     repositories {
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
-        classpath 'org.springframework:springloaded:1.2.5.RELEASE'  // for hot swapping setting
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        // classpath 'org.springframework:springloaded:1.2.5.RELEASE'  // for hot swapping setting
         // google app engine deploy lib
         classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
     }
@@ -18,6 +20,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.google.cloud.tools.appengine'
 
 // gradle bootRun으로 실행시  jvm 전달
@@ -32,7 +35,7 @@ idea {
     }
 }
 
-// for hot swapping setting end
+// for hot swapping setting endå
 
 jar {
     baseName = 'suggues-api'
@@ -60,7 +63,7 @@ targetCompatibility = 1.8
 appengine {
     deploy {
         version = "GCLOUD_CONFIG"
-        project = "GCLOUD_CONFIG"
+        projectId = "GCLOUD_CONFIG"
     }
 }
 
@@ -72,11 +75,15 @@ dependencies {
 
     compile 'org.jsoup:jsoup:1.11.3'
 
-    compile("org.springframework.boot:spring-boot-starter-web")
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'     // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+
+
+
     compile('org.apache.commons:commons-lang3:3.5')
 
-    // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
-    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     // Use MySQL Connector-J
     compile 'mysql:mysql-connector-java'
     compile('org.projectlombok:lombok:1.16.22')
@@ -91,6 +98,9 @@ dependencies {
     compile('org.seleniumhq.selenium:selenium-firefox-driver:2.48.2')
     compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.4'
 
+    //handlebars template engine
+    compile 'pl.allegro.tech.boot:handlebars-spring-boot-starter:0.3.0'
+    compile 'com.github.jknack:handlebars-jackson2:4.0.7'                   // json parsing
 
     // google ML vision
     compile 'com.google.cloud:google-cloud-vision:1.35.0'
@@ -109,19 +119,13 @@ dependencies {
 
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile 'com.google.firebase:firebase-admin:5.9.0'
-// webPush 관련 추가 module end
+    // webPush 관련 추가 module end
 
     //logging
     compile 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 
-
-
-
-
     // For making HTTP requests
     testCompile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.2'
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-
 
 
     // For reading the demo vapid keypair from a pem file

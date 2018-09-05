@@ -3,6 +3,7 @@ package somun.api.v1.content;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = "*")
+@CrossOrigin(allowCredentials = "true",origins = "*")
 @RequestMapping(path="Content/V1/")
 @Api(value = "Content/V1/", description = "Content Service", tags = {"Content"})
 @ApiResponses(value = {
@@ -166,14 +167,16 @@ public class ContentRestController {
     public Page<EventContentWithUser> findEventList(@CookieValue(value = "webCertInfo" , defaultValue ="") String webCertInfoStr
         , @ApiIgnore @PageableDefault(page=0, size=20) Pageable pageable
         , @PathVariable("searchText")  String searchText
-        , @PathVariable("searchDate")  String searchDateStr
+        , @PathVariable("searchDate") String searchDateStr
         , @PathVariable("latitude")  Double latitude
         , @PathVariable("longitude")  Double longitude
         , @PathVariable("locationDistance")  Integer locationDistance
          ) throws ParseException {
 
 
-        Date searchDate = new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);;
+        Date searchDate = "null".equals(searchDateStr) ?  null
+                                                        : new SimpleDateFormat("yyyy-MM-dd").parse(searchDateStr);
+
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
 
 
@@ -208,7 +211,7 @@ public class ContentRestController {
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
 
-        EventContent eventContent = eventContentRepository.findOne(eventContentNo);
+        EventContent eventContent = eventContentRepository.findById(eventContentNo).get();
         eventContent.setEventLocations(eventLocationRepository.findByEventContentNoAndUseYn(eventContentNo,"Y"));
         ContentThumbUp contentThumbUp = Optional.ofNullable(contentThumbUpRepository
                                                                 .findFirstByEventContentNoAndUseYnAndUserNo(eventContentNo,"Y",webCertInfo.getUser().getUserNo()))
@@ -252,8 +255,7 @@ public class ContentRestController {
         eventContent.setUpdateDt(toDay);
         eventContent.setUpdateNo(webCertInfo.getUser().getUserNo());
 
-
-        return eventContentService.saveEventContent(eventContent).getEventContentNo();
+    return eventContentService.saveEventContent(eventContent).getEventContentNo();
     }
 
     @PostMapping(value = "/updateContent/{eventContentNo}")
@@ -284,13 +286,13 @@ public class ContentRestController {
 
         Date toDay = new Date();
         WebCertInfo webCertInfo = webCertService.webCertInfoBuild(webCertInfoStr);
-
-        eventContentModifyRepository.updateContentStat(EventContent.builder()
-                                                        .eventContentNo(eventContentNo)
-                                                        .updateDt(toDay)
-                                                        .updateNo(webCertInfo.getUser().getUserNo())
-                                                        .stat(stat)
-                                                        .build());
+        EventContent eventContent = EventContent.builder()
+                                         .eventContentNo(eventContentNo)
+                                         .updateDt(toDay)
+                                         .updateNo(webCertInfo.getUser().getUserNo())
+                                         .stat(stat)
+                                         .build();
+        eventContentModifyRepository.updateContentStat(eventContent);
 
         contentActivityModifyRepository.updateContentActivityStat(ContentActivity.builder()
                                                       .activityRefNo(eventContentNo)
@@ -299,6 +301,9 @@ public class ContentRestController {
                                                       .updateDt(toDay)
                                                       .updateNo(webCertInfo.getUser().getUserNo())
                                                       .build());
+
+        contentSearchService.mergeSearchIndex(Arrays.asList(eventContent));
+
         return eventContentNo;
     }
 
@@ -608,16 +613,24 @@ public class ContentRestController {
              switch (cac.getContentActivity().getActivityCode())
              {
                  case CONTENT:
-                     cac.setEventContent(eventContentRepository.findOne(d.getActivityRefNo()));
+                     cac.setEventContent(eventContentRepository.findById(d.getActivityRefNo()).get());
                      break;
                  case COMMENT:
-                     cac.setEventContent(eventContentRepository.findOne(contentCommentRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     cac.setEventContent(eventContentRepository.findById(contentCommentRepository.findById(d.getActivityRefNo())
+                                                                                                 .get()
+                                                                                                 .getEventContentNo())
+                                                               .get());
                      break;
                  case ALARM:
-                     cac.setEventContent(eventContentRepository.findOne(contentAlarmRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     cac.setEventContent(eventContentRepository.findById(contentAlarmRepository.findById(d.getActivityRefNo())
+                                                                                               .get()
+                                                                                               .getEventContentNo())
+                                                               .get());
                      break;
                  case THUMBSUP:
-                     cac.setEventContent(eventContentRepository.findOne(contentThumbUpRepository.findOne(d.getActivityRefNo()).getEventContentNo()));
+                     cac.setEventContent(eventContentRepository.findById(contentThumbUpRepository.findById(d.getActivityRefNo())
+                                                                                                 .get().getEventContentNo())
+                                                               .get());
                      break;
              }
              return cac;
@@ -637,17 +650,17 @@ public class ContentRestController {
                                "Default sort order is ascending. " +
                                "Multiple sort criteria are supported.")
                        })
-    public Page<SearchIndexComb> indexDocList(@ApiIgnore @PageableDefault(page=0, size=10) Pageable pageable
+    public Page<SearchIndexComb> indexDocList(@ApiIgnore @PageableDefault(page=0, size= 10) Pageable pageable
         , @PathVariable("indexStartDate")  String indexStartDate
         , @PathVariable("indexEndDate")  String indexEndDate
          ) throws ParseException {
 
 
         Page<EventContent> indexDocs = eventContentRepository
-            .findAllByUpdateDtGreaterThanEqualAndUpdateDtLessThanEqualAndStat(
+            .findAllByUpdateDtGreaterThanEqualAndUpdateDtLessThanEqual(
                 new SimpleDateFormat("yyyy-MM-dd").parse(indexStartDate)
                 , new SimpleDateFormat("yyyy-MM-dd").parse(indexEndDate)
-                , Codes.EV_STAT.S2, pageable
+                , pageable
             );
 
 
@@ -679,6 +692,7 @@ public class ContentRestController {
                                                             .longitude(eventLocation.getLongitude())
                                                             .latitude(eventLocation.getLatitude())
                                                              .createNo(eventLocation.getCreateNo())
+                                                             .stat(d.getStat().name())
                                                              .build();
 
             return searchIndexComb;

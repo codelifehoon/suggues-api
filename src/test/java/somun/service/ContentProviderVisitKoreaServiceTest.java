@@ -12,16 +12,17 @@ import somun.Application;
 import somun.common.util.RandomUti;
 import somun.service.repository.vo.content.EventContent;
 import somun.service.repository.vo.provider.ContentProvider;
+import somun.service.repositoryClient.ContentProviderVisitKoreaService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes =  Application.class)
-public class ContentProviderManagerServiceTest {
+public class ContentProviderVisitKoreaServiceTest {
 
     @Autowired
-    ContentProviderManagerService contentProviderManagerService;
+    ContentProviderVisitKoreaService contentProviderVisitKoreaService;
 
 
     @Autowired
@@ -80,7 +81,7 @@ public class ContentProviderManagerServiceTest {
                                                          .providerKey("1234567")
                                                          .providerModifiedtime(RandomUti.randomString(10))
                                                          .build();
-        EventContent eventContent = contentProviderManagerService.mergeIntoVisitKoreaContetToEventContent(contentProvider);
+        EventContent eventContent = contentProviderVisitKoreaService.mergeIntoProviderContetToEventContent(contentProvider);
         assertThat(eventContent).isNotNull();
 
 
